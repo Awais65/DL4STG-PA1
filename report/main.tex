@@ -417,30 +417,61 @@ log + $d{=}16$            & 67.41 $\pm$ 2.96 & 43.7 & 54.1 & 5{,}921 & 8.0\\\bot
 \end{itemize}
 
 %---------------------------------------------------------------------
-\subsection*{2.6 Final submission}
+\subsection*{2.6 Final submission and what the leaderboard taught me}
+\textbf{Attempt \#1: a single refit model.}
 \begin{itemize}
-  \item \textbf{Configuration:} the reference model with the $\log1p$ target (past+future external
-  features, daily phase, $L{=}336$, label 48, $d{=}32$, 1+1 layers). I chose it over the smaller
-  variants because it had the best mean RMSE, the lowest seed variance, and reliable early stopping.
-  RMSE dominates the score, and the smaller models' saving in $P$ came with higher $E$ and higher
-  variance.
-  \item \textbf{Training to produce the forecast} (one model, seed 0, no ensemble): early stopping
-  on the validation split ran 7 epochs (best epoch 5; validation RMSE 67.46, MAE 43.5, sMAPE 53.1).
-  The model was then \emph{refit on the full history} for 5 epochs, so that the most recent 6
-  months, which are closest to the hidden block, are used. Both phases are counted.
-  \item \textbf{Declared:} $\mathbf{P = 22{,}081}$ trainable parameters,
-  $\mathbf{E = 7 + 5 = 12}$ epochs.
-  \item \textbf{Reproduce:} \texttt{python pipeline.py --final --refit --exog full --target log
-  --stride 4 --max\_epochs 10 --patience 2 --seeds 0 --tag final}. This prints $P$ and $E$ and
-  writes \texttt{results/final\_submission.txt}.
-  \item \textbf{Sanity check of the forecast:} it is low (median 23.6, max 69.2). The supplied
-  covariates over the horizon explain this: feature D is high (mean 49 over steps 72--168) and
-  indicator H is active 62\% of the time. Historically, the target averages 23.4 under H with
-  D$>$50, against 98.2 overall. This is a covariate-driven ``clean period'' forecast, not a model
-  failure.
-  \item \textbf{Leaderboard:} \todo{score(s) per submission}. The validation per-block RMSE has
-  median 48.5 and mean 59.5 across 183 blocks, so a single 168-step score anywhere in that
-  range is consistent with validation and is not evidence for re-tuning.
+  \item \textbf{Model:} the $\log1p$-target configuration, seed 0. Early stopping on validation
+  ran 7 epochs (best epoch 5; val RMSE 67.46). It was then refit on the full history for 5 epochs.
+  $P=22{,}081$, $E=7+5=12$.
+  \item \textbf{Leaderboard:} RMSE \textbf{142.04}, MAE 96.4, sMAPE 99.3\%, score 142.04. This
+  is around the 97th percentile of the validation per-block RMSE (median 49), and the near-100\%
+  sMAPE shows the forecast was far too low. The model had predicted a ``clean'' week (median 23.6),
+  which the horizon covariates seemed to support.
+\end{itemize}
+
+\textbf{Diagnosis (training and validation data only; \texttt{diagnose*.py}).} A score in the tail
+can be bad luck, so before using another attempt I checked whether the \emph{method} was fragile:
+\begin{itemize}
+  \item \textbf{The single-week forecast is unstable.} Across seeds 0--2, with and without refit,
+  the forecast for the hidden week had means from \textbf{26 to 71}. The average pairwise RMSE
+  between these six forecasts was 28.6. The submitted model was the lowest of the six.
+  \item \textbf{The refit step was never validated.} For seed 0 it moved the forecast mean from 71
+  (validated model) to 26. Pooled validation RMSE averages out such per-block variance; a single
+  168-step block does not.
+  \item \textbf{The log target is biased low in high weeks:} mean bias $-33.7$ on the top quartile
+  of validation blocks by level.
+\end{itemize}
+
+\textbf{Attempt \#2: a 3-seed ensemble of validated models, no refit.} The decision rests on
+validation:
+\begin{center}\small
+\begin{tabular}{lccccc}\toprule
+ & Val RMSE & Val MAE & Block RMSE p90 & Block RMSE p97 & $P$ / $E$\\midrule
+Single seeds 0/1/2 & 67.46 / 65.80 / 67.15 & 43.5--44.5 & 100--106 & 127--141 & 22{,}081 / 4--7\
+\textbf{Mean of the 3 seeds} & \textbf{63.95} & \textbf{42.5} & \textbf{96} & \textbf{126} & 66{,}243 / 17\\bottomrule
+\end{tabular}\end{center}
+\begin{itemize}
+  \item The ensemble beats every single seed on pooled RMSE and, above all, shortens the tail of
+  bad blocks, which is where attempt \#1 landed.
+  \item \textbf{Declared:} $\mathbf{P = 3\times22{,}081 = 66{,}243}$,
+  $\mathbf{E = 7+6+4 = 17}$ (each member's early-stopping epochs; no refit).
+  \item \textbf{Reproduce:} \texttt{python pipeline.py --final --exog full --target log --stride 4
+  --max\_epochs 10 --patience 2 --seeds 0 1 2 --tag final\_ensemble}.
+  \item \textbf{Leaderboard:} RMSE \textbf{112.15}, MAE 71.5, sMAPE 60.4\%, score \textbf{112.16}.
+  That is 30 RMSE better than attempt \#1. This is the submission the leaderboard uses.
+\end{itemize}
+
+\textbf{Lessons.}
+\begin{itemize}
+  \item \textbf{Size penalties are tiny here.} Score $-$ RMSE was 0.006 for attempt \#1 and 0.009
+  for attempt \#2, despite 3$\times$ the parameters. Differences between designs are tens of RMSE
+  points, so on this leaderboard variance reduction is worth far more than parameter economy.
+  \item \textbf{A good pooled validation score does not guarantee a good single-block score.}
+  I should have checked the stability of the forecast at the actual forecast origin before the
+  first submission, and not shipped an unvalidated refit.
+  \item \textbf{Transparency.} The leaderboard result \emph{prompted} the diagnosis. The switch to
+  the ensemble is justified by the validation table above, not by leaderboard feedback. No further
+  tuning was done on the leaderboard.
 \end{itemize}
 
 %---------------------------------------------------------------------

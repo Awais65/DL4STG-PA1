@@ -52,13 +52,18 @@ python pipeline.py --exog none --stride 4 --tag ablation_none  # external-data a
 python pipeline.py --exog past --stride 4 --tag ablation_past
 python pipeline.py --exog full --stride 4 --tag ablation_full
 python pipeline.py --exog full --stride 4 --target log --tag tune_log   # chosen config (3 seeds)
+python diagnose_stability.py && python diagnose_ensemble.py         # forecast-stability checks
+# Leaderboard attempt 1: single refit model, P = 22081, E = 7 + 5 = 12
 python pipeline.py --final --refit --exog full --target log --stride 4 --max_epochs 10 \
-    --patience 2 --seeds 0 --tag final                         # P = 22081, E = 7 + 5 = 12
+    --patience 2 --seeds 0 --tag final
+# Leaderboard attempt 2 (best): 3-seed ensemble, no refit, P = 66243, E = 7 + 6 + 4 = 17
+python pipeline.py --final --exog full --target log --stride 4 --max_epochs 10 \
+    --patience 2 --seeds 0 1 2 --tag final_ensemble
 ```
 
-The final command prints the declared **P** (trainable parameters) and **E** (training epochs).
-E counts both the early-stopping run and the refit. The 168 comma-separated forecasts are written
-to `results/final_submission.txt`.
+Each `--final` command prints the declared **P** (trainable parameters) and **E** (training
+epochs). For an ensemble, both are summed over its members, and E includes any refit epochs. The
+168 comma-separated forecasts are written to `results/<tag>_submission.txt`.
 
 ### Attribution
 

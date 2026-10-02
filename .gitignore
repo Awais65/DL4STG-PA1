@@ -1,0 +1,23 @@
+# OS / editor
+.DS_Store
+__MACOSX/
+Thumbs.db
+.ipynb_checkpoints/
+__pycache__/
+*.pyc
+
+# Course handout (not redistributed)
+DL4STG-PA1.pdf
+
+# Regenerable / local artefacts
+Question 1/Assignment1.orig.ipynb
+Question 1/checkpoints/
+Question 1/full_run.log
+
+# LaTeX build files
+report/*.aux
+report/*.log
+report/*.out
+report/*.synctex.gz
+report/*.fdb_latexmk
+report/*.fls

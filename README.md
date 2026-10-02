@@ -1,0 +1,66 @@
+# AI651 — Deep Learning for Space, Time and Graphs · Programming Assignment 1
+
+LUMS, Fall 2026. The report is in `report/` (LaTeX source and figures).
+
+```
+Question 1/                     Task 1: forecasting across heterogeneous sensors
+  Assignment1.ipynb             notebook with the three implementations and deployment choices
+  Assignment1_executed_full.ipynb   executed with PA1_PRESET=full (submitted evidence)
+  harness/                      supplied course harness (unchanged)
+  results/design/               numbered Outputs 1.1–4.3 (CSV, LaTeX tables, PDF figures)
+  requirements.txt
+Question 2 - Leaderboard/       Task 2: Autoformer leaderboard challenge
+  Data/                         provided CSVs
+  autoformer.py                 Autoformer (series decomposition + Auto-Correlation)
+  pipeline.py                   data, chronological validation, multi-seed training, final forecast
+  eda_figure.py                 exploratory figure used in the report
+  results/                      per-experiment JSON + logs, final forecast and submission string
+report/                         main.tex + figures/
+```
+
+## Environment
+
+Python 3.10+ with PyTorch 2.x (developed in a conda env with Python 3.10.19, torch 2.6.0+cu124).
+
+```bash
+pip install -r "Question 1/requirements.txt"
+```
+
+## Task 1
+
+Implemented in `Question 1/Assignment1.ipynb`: `RawAttentionForecaster.forward`,
+`SeriesDecomposition.forward`, and `aggregate_delays`. Each one passes its notebook check.
+
+```bash
+cd "Question 1"
+PA1_PRESET=full jupyter nbconvert --to notebook --execute Assignment1.ipynb \
+    --output Assignment1_executed_full.ipynb --ExecutePreprocessor.timeout=-1
+```
+
+Deployment choices (made from validation evidence before Output 4.3 was run): Period-routed ridge
+for the established stations and for held-out Station 4.
+
+## Task 2
+
+The provided data is in `Question 2 - Leaderboard/Data/`: `student_train.csv`, `student_test.csv`
+and `optional_external_data.csv`.
+
+```bash
+cd "Question 2 - Leaderboard"
+python pipeline.py --baselines --tag baselines                 # naive baselines
+python pipeline.py --exog none --stride 4 --tag ablation_none  # external-data ablation (3 seeds)
+python pipeline.py --exog past --stride 4 --tag ablation_past
+python pipeline.py --exog full --stride 4 --tag ablation_full
+FINAL_COMMAND_PLACEHOLDER
+```
+
+The final command prints the declared **P** (trainable parameters) and **E** (training epochs).
+E counts both the early-stopping run and the refit. The 168 comma-separated forecasts are written
+to `results/final_submission.txt`.
+
+### Attribution
+
+`autoformer.py` was written from scratch following Wu et al. (2021), *Autoformer: Decomposition
+Transformers with Auto-Correlation for Long-Term Series Forecasting*, and the structure of the
+authors' reference implementation, https://github.com/thuml/Autoformer. The module docstring lists
+the differences from that implementation.

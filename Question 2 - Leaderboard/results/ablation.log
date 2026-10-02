@@ -1,0 +1,55 @@
+[ablation_none] seed=0 params=21441 train_windows=9655 val_windows=183
+    {'epoch': 1, 'train_loss': 1.0813, 'sec': 14.2059, 'MAE': 68.1029, 'RMSE': 89.3419, 'sMAPE': 79.3922, 'block_RMSE_mean': 81.1178, 'block_RMSE_median': 68.5019}
+    {'epoch': 2, 'train_loss': 1.0552, 'sec': 12.0579, 'MAE': 67.8128, 'RMSE': 88.8491, 'sMAPE': 79.1546, 'block_RMSE_mean': 80.7286, 'block_RMSE_median': 68.4477}
+    {'epoch': 3, 'train_loss': 1.048, 'sec': 12.0731, 'MAE': 69.4551, 'RMSE': 89.4022, 'sMAPE': 79.6662, 'block_RMSE_mean': 81.8698, 'block_RMSE_median': 69.6965}
+    {'epoch': 4, 'train_loss': 1.0438, 'sec': 11.4547, 'MAE': 70.3398, 'RMSE': 90.1018, 'sMAPE': 79.9631, 'block_RMSE_mean': 82.4788, 'block_RMSE_median': 71.3293}
+[ablation_none] seed=0 RMSE=88.85 MAE=67.81 sMAPE=79.15 best_epoch=2/4
+[ablation_none] seed=1 params=21441 train_windows=9655 val_windows=183
+    {'epoch': 1, 'train_loss': 1.0762, 'sec': 12.1456, 'MAE': 69.5801, 'RMSE': 89.7496, 'sMAPE': 79.7708, 'block_RMSE_mean': 82.113, 'block_RMSE_median': 69.59}
+    {'epoch': 2, 'train_loss': 1.0544, 'sec': 12.1905, 'MAE': 70.8849, 'RMSE': 90.216, 'sMAPE': 80.3052, 'block_RMSE_mean': 82.897, 'block_RMSE_median': 72.3581}
+    {'epoch': 3, 'train_loss': 1.046, 'sec': 12.0348, 'MAE': 70.8419, 'RMSE': 90.4072, 'sMAPE': 80.229, 'block_RMSE_mean': 82.8717, 'block_RMSE_median': 70.8312}
+[ablation_none] seed=1 RMSE=89.75 MAE=69.58 sMAPE=79.77 best_epoch=1/3
+[ablation_none] seed=2 params=21441 train_windows=9655 val_windows=183
+    {'epoch': 1, 'train_loss': 1.0945, 'sec': 12.1161, 'MAE': 68.0699, 'RMSE': 90.3347, 'sMAPE': 79.6532, 'block_RMSE_mean': 81.4407, 'block_RMSE_median': 67.6368}
+    {'epoch': 2, 'train_loss': 1.0684, 'sec': 12.2071, 'MAE': 69.9664, 'RMSE': 90.3134, 'sMAPE': 79.6556, 'block_RMSE_mean': 82.4683, 'block_RMSE_median': 70.4305}
+    {'epoch': 3, 'train_loss': 1.052, 'sec': 12.2505, 'MAE': 71.6364, 'RMSE': 91.1888, 'sMAPE': 80.2845, 'block_RMSE_mean': 83.5516, 'block_RMSE_median': 72.2192}
+    {'epoch': 4, 'train_loss': 1.0517, 'sec': 11.6937, 'MAE': 73.3816, 'RMSE': 92.0332, 'sMAPE': 80.649, 'block_RMSE_mean': 84.8973, 'block_RMSE_median': 73.8615}
+[ablation_none] seed=2 RMSE=90.31 MAE=69.97 sMAPE=79.66 best_epoch=2/4
+[ablation_none] SUMMARY RMSE=89.64±0.74, MAE=69.12±1.15, sMAPE=79.53±0.33, block_RMSE_mean=81.77±0.92, epochs_run=3.67±0.58, best_epoch=1.67±0.58, fit_sec=47.05±9.89
+[ablation_past] seed=0 params=22081 train_windows=9655 val_windows=183
+    {'epoch': 1, 'train_loss': 1.0772, 'sec': 13.4412, 'MAE': 69.7504, 'RMSE': 90.2139, 'sMAPE': 79.6104, 'block_RMSE_mean': 82.3191, 'block_RMSE_median': 68.5982}
+    {'epoch': 2, 'train_loss': 1.037, 'sec': 11.7073, 'MAE': 68.4039, 'RMSE': 88.6289, 'sMAPE': 79.155, 'block_RMSE_mean': 81.23, 'block_RMSE_median': 68.4414}
+    {'epoch': 3, 'train_loss': 1.0156, 'sec': 11.984, 'MAE': 73.0093, 'RMSE': 91.3402, 'sMAPE': 80.9371, 'block_RMSE_mean': 84.672, 'block_RMSE_median': 76.4666}
+    {'epoch': 4, 'train_loss': 1.0086, 'sec': 11.8426, 'MAE': 72.5336, 'RMSE': 90.8345, 'sMAPE': 80.9951, 'block_RMSE_mean': 84.4424, 'block_RMSE_median': 76.0955}
+[ablation_past] seed=0 RMSE=88.63 MAE=68.40 sMAPE=79.15 best_epoch=2/4
+[ablation_past] seed=1 params=22081 train_windows=9655 val_windows=183
+    {'epoch': 1, 'train_loss': 1.076, 'sec': 11.8796, 'MAE': 67.6277, 'RMSE': 89.1492, 'sMAPE': 78.9671, 'block_RMSE_mean': 80.8656, 'block_RMSE_median': 66.7222}
+    {'epoch': 2, 'train_loss': 1.0387, 'sec': 11.9896, 'MAE': 69.5199, 'RMSE': 89.1467, 'sMAPE': 79.6168, 'block_RMSE_mean': 81.6477, 'block_RMSE_median': 66.6826}
+    {'epoch': 3, 'train_loss': 1.0148, 'sec': 12.049, 'MAE': 71.3916, 'RMSE': 90.0357, 'sMAPE': 80.4068, 'block_RMSE_mean': 83.0719, 'block_RMSE_median': 70.1506}
+    {'epoch': 4, 'train_loss': 1.0001, 'sec': 11.6434, 'MAE': 68.6795, 'RMSE': 88.6848, 'sMAPE': 79.2259, 'block_RMSE_mean': 81.2513, 'block_RMSE_median': 67.4586}
+    {'epoch': 5, 'train_loss': 0.9891, 'sec': 11.7359, 'MAE': 74.508, 'RMSE': 92.5877, 'sMAPE': 81.8576, 'block_RMSE_mean': 86.5584, 'block_RMSE_median': 77.5516}
+    {'epoch': 6, 'train_loss': 0.972, 'sec': 11.755, 'MAE': 68.3666, 'RMSE': 89.826, 'sMAPE': 79.3717, 'block_RMSE_mean': 81.9155, 'block_RMSE_median': 70.3693}
+[ablation_past] seed=1 RMSE=88.68 MAE=68.68 sMAPE=79.23 best_epoch=4/6
+[ablation_past] seed=2 params=22081 train_windows=9655 val_windows=183
+    {'epoch': 1, 'train_loss': 1.0834, 'sec': 12.116, 'MAE': 68.4506, 'RMSE': 89.8722, 'sMAPE': 79.3971, 'block_RMSE_mean': 81.3743, 'block_RMSE_median': 68.1131}
+    {'epoch': 2, 'train_loss': 1.0431, 'sec': 12.0255, 'MAE': 70.7347, 'RMSE': 89.4215, 'sMAPE': 80.0759, 'block_RMSE_mean': 82.7381, 'block_RMSE_median': 69.5952}
+    {'epoch': 3, 'train_loss': 1.0202, 'sec': 12.07, 'MAE': 72.5896, 'RMSE': 91.2958, 'sMAPE': 80.761, 'block_RMSE_mean': 84.3807, 'block_RMSE_median': 72.4884}
+    {'epoch': 4, 'train_loss': 1.0065, 'sec': 12.0592, 'MAE': 78.1459, 'RMSE': 95.1917, 'sMAPE': 83.2279, 'block_RMSE_mean': 89.3475, 'block_RMSE_median': 79.6284}
+[ablation_past] seed=2 RMSE=89.42 MAE=70.73 sMAPE=80.08 best_epoch=2/4
+[ablation_past] SUMMARY RMSE=88.91±0.44, MAE=69.27±1.27, sMAPE=79.49±0.51, block_RMSE_mean=81.74±0.86, epochs_run=4.67±1.15, best_epoch=2.67±1.15, fit_sec=58.31±11.77
+[ablation_full] seed=0 params=22081 train_windows=9655 val_windows=183
+    {'epoch': 1, 'train_loss': 0.7757, 'sec': 13.6195, 'MAE': 56.0788, 'RMSE': 71.9056, 'sMAPE': 71.7238, 'block_RMSE_mean': 68.0381, 'block_RMSE_median': 63.7964}
+    {'epoch': 2, 'train_loss': 0.6444, 'sec': 12.3605, 'MAE': 66.7258, 'RMSE': 80.2712, 'sMAPE': 77.7272, 'block_RMSE_mean': 77.8721, 'block_RMSE_median': 76.4969}
+    {'epoch': 3, 'train_loss': 0.5942, 'sec': 12.1742, 'MAE': 91.8827, 'RMSE': 104.1345, 'sMAPE': 89.1215, 'block_RMSE_mean': 101.9628, 'block_RMSE_median': 100.8246}
+[ablation_full] seed=0 RMSE=71.91 MAE=56.08 sMAPE=71.72 best_epoch=1/3
+[ablation_full] seed=1 params=22081 train_windows=9655 val_windows=183
+    {'epoch': 1, 'train_loss': 0.7838, 'sec': 12.2526, 'MAE': 58.6508, 'RMSE': 72.0452, 'sMAPE': 71.9408, 'block_RMSE_mean': 69.0438, 'block_RMSE_median': 66.7538}
+    {'epoch': 2, 'train_loss': 0.6405, 'sec': 12.0465, 'MAE': 63.6224, 'RMSE': 75.8212, 'sMAPE': 75.196, 'block_RMSE_mean': 73.4147, 'block_RMSE_median': 74.1745}
+    {'epoch': 3, 'train_loss': 0.597, 'sec': 12.3602, 'MAE': 60.5892, 'RMSE': 73.4723, 'sMAPE': 73.318, 'block_RMSE_mean': 70.9535, 'block_RMSE_median': 69.8185}
+[ablation_full] seed=1 RMSE=72.05 MAE=58.65 sMAPE=71.94 best_epoch=1/3
+[ablation_full] seed=2 params=22081 train_windows=9655 val_windows=183
+    {'epoch': 1, 'train_loss': 0.8211, 'sec': 12.2219, 'MAE': 52.8852, 'RMSE': 69.4531, 'sMAPE': 69.0692, 'block_RMSE_mean': 64.8629, 'block_RMSE_median': 57.2699}
+    {'epoch': 2, 'train_loss': 0.649, 'sec': 11.9863, 'MAE': 57.7595, 'RMSE': 70.8253, 'sMAPE': 71.1621, 'block_RMSE_mean': 67.7099, 'block_RMSE_median': 64.1621}
+    {'epoch': 3, 'train_loss': 0.6132, 'sec': 11.9982, 'MAE': 55.8501, 'RMSE': 69.8963, 'sMAPE': 70.3864, 'block_RMSE_mean': 66.5588, 'block_RMSE_median': 61.7484}
+[ablation_full] seed=2 RMSE=69.45 MAE=52.89 sMAPE=69.07 best_epoch=1/3
+[ablation_full] SUMMARY RMSE=71.13±1.46, MAE=55.87±2.89, sMAPE=70.91±1.60, block_RMSE_mean=67.31±2.18, epochs_run=3.00±0.00, best_epoch=1.00±0.00, fit_sec=39.15±4.42

@@ -51,7 +51,9 @@ python pipeline.py --baselines --tag baselines                 # naive baselines
 python pipeline.py --exog none --stride 4 --tag ablation_none  # external-data ablation (3 seeds)
 python pipeline.py --exog past --stride 4 --tag ablation_past
 python pipeline.py --exog full --stride 4 --tag ablation_full
-FINAL_COMMAND_PLACEHOLDER
+python pipeline.py --exog full --stride 4 --target log --tag tune_log   # chosen config (3 seeds)
+python pipeline.py --final --refit --exog full --target log --stride 4 --max_epochs 10 \
+    --patience 2 --seeds 0 --tag final                         # P = 22081, E = 7 + 5 = 12
 ```
 
 The final command prints the declared **P** (trainable parameters) and **E** (training epochs).

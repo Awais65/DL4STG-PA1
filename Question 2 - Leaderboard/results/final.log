@@ -1,0 +1,17 @@
+    {'epoch': 1, 'train_loss': 0.6429, 'sec': 2.4464, 'MAE': 47.2012, 'RMSE': 72.2219, 'sMAPE': 57.6117, 'block_RMSE_mean': 63.7578, 'block_RMSE_median': 50.285}
+    {'epoch': 2, 'train_loss': 0.5146, 'sec': 2.0219, 'MAE': 46.294, 'RMSE': 72.9891, 'sMAPE': 55.5193, 'block_RMSE_mean': 63.2795, 'block_RMSE_median': 51.427}
+    {'epoch': 3, 'train_loss': 0.4675, 'sec': 2.1579, 'MAE': 46.4841, 'RMSE': 71.8892, 'sMAPE': 56.525, 'block_RMSE_mean': 61.9714, 'block_RMSE_median': 50.3516}
+    {'epoch': 4, 'train_loss': 0.439, 'sec': 2.0375, 'MAE': 43.1021, 'RMSE': 67.991, 'sMAPE': 52.958, 'block_RMSE_mean': 59.5316, 'block_RMSE_median': 49.3297}
+    {'epoch': 5, 'train_loss': 0.423, 'sec': 2.041, 'MAE': 43.5082, 'RMSE': 67.4639, 'sMAPE': 53.1089, 'block_RMSE_mean': 59.5267, 'block_RMSE_median': 48.5408}
+    {'epoch': 6, 'train_loss': 0.4093, 'sec': 2.0564, 'MAE': 46.8001, 'RMSE': 72.9303, 'sMAPE': 55.6693, 'block_RMSE_mean': 63.0359, 'block_RMSE_median': 50.4518}
+    {'epoch': 7, 'train_loss': 0.4009, 'sec': 2.0504, 'MAE': 42.4955, 'RMSE': 67.5084, 'sMAPE': 51.8437, 'block_RMSE_mean': 59.1982, 'block_RMSE_median': 49.5661}
+    {'epoch': 1, 'train_loss': 0.6232, 'sec': 2.3224}
+    {'epoch': 2, 'train_loss': 0.4995, 'sec': 2.2843}
+    {'epoch': 3, 'train_loss': 0.4583, 'sec': 2.2875}
+    {'epoch': 4, 'train_loss': 0.4336, 'sec': 2.2926}
+    {'epoch': 5, 'train_loss': 0.4178, 'sec': 2.3168}
+{'seed': 0, 'early_stop_epochs_run': 7, 'best_epoch': 5, 'val': {'MAE': 43.50815266049718, 'RMSE': 67.46391154969199, 'sMAPE': 53.108872513395674, 'block_RMSE_mean': 59.526659007951366, 'block_RMSE_median': 48.540759463711815}, 'epochs_counted': 12}
+
+P (trainable params) = 22081
+E (training epochs) = 12
+submission string written to results/final_submission.txt

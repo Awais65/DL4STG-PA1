@@ -382,17 +382,66 @@ Past only (up to the forecast origin)          & 88.91 $\pm$ 0.44 & 69.3 $\pm$ 1
 
 %---------------------------------------------------------------------
 \subsection*{2.5 Tuning}
-\todo{Fill in from \texttt{results/tune.log}: one-change-at-a-time variants of the past+future
-model (lr $3{\times}10^{-4}$, $\log1p$ target, $L\in\{96,168\}$ vs.\ 336, $d{=}16$, dropout 0.3,
-dropping feature C, Huber loss), each 3 seeds, reported against the reference
-$71.13\pm1.46$.}
+Each variant changes \emph{one} setting of the past+future reference (the ablation's best row),
+3 seeds, same validation protocol. Logs are in \texttt{results/tune.log}.
+\begin{center}\small
+\begin{tabular}{lccccc}\toprule
+Variant & RMSE & MAE & sMAPE & Params & Epochs run\\\midrule
+Reference ($L{=}336$, $d{=}32$, lr $10^{-3}$, raw target) & 71.13 $\pm$ 1.46 & 55.9 & 70.9 & 22{,}081 & 3.0\\
+\textbf{$\log1p$ target} & \textbf{66.80 $\pm$ 0.89} & \textbf{44.1} & \textbf{54.5} & 22{,}081 & 5.7\\
+lr $3{\times}10^{-4}$     & 67.60 $\pm$ 1.85 & 51.5 & 67.5 & 22{,}081 & 6.0\\
+$d{=}16$, $d_\text{ff}{=}32$ & 67.89 $\pm$ 2.36 & 51.6 & 68.4 & $\approx$5.9k & 4.3\\
+Huber loss                & 69.92 $\pm$ 2.07 & 53.1 & 68.5 & 22{,}081 & 3.0\\
+drop feature C            & 70.17 $\pm$ 0.66 & 55.5 & 70.5 & 22{,}049 & 3.7\\
+$L{=}168$                 & 70.20 $\pm$ 6.44 & 53.7 & 69.9 & 22{,}081 & 3.3\\
+dropout 0.3, lr $3{\times}10^{-4}$ & 71.01 $\pm$ 0.89 & 55.6 & 70.1 & 22{,}081 & 4.7\\
+$L{=}96$                  & 76.25 $\pm$ 3.70 & 57.4 & 73.3 & 22{,}081 & 3.3\\\midrule
+log + lr $3{\times}10^{-4}$ + $d{=}16$ & 68.54 $\pm$ 1.30 & 44.6 & 54.8 & 5{,}921 & 10 (cap)\\
+log + $d{=}16$            & 67.41 $\pm$ 2.96 & 43.7 & 54.1 & 5{,}921 & 8.0\\\bottomrule
+\end{tabular}\end{center}
+\begin{itemize}
+  \item \textbf{The $\log1p$ target is the largest and most reliable gain:} RMSE $-4.3$, MAE
+  $-21\%$, sMAPE $-23\%$, with the \emph{smallest} seed spread. The heavy right tail makes MSE on
+  the raw scale dominated by a few peaks. The log scale lets the model learn the bulk of the
+  distribution and the timing of episodes.
+  \item \textbf{Long context matters.} $L{=}96$ is clearly worse and $L{=}168$ is unstable. The
+  336-step window covers enough history for the decomposition and the delay scores to see several
+  daily cycles and the preceding episode.
+  \item \textbf{The gains did not stack.} Combining the log target with the lower learning rate
+  and the smaller width was \emph{worse} than the log target alone. The small models were still
+  improving at the 10-epoch cap or stalled early on some seeds ($\pm$2.96), so their parameter
+  saving would be paid back in epochs and in unpredictability.
+  \item \textbf{Metric disagreement.} The log target improves MAE and sMAPE far more than RMSE. It
+  optimises something close to a \emph{geometric} mean, which is good on typical levels and biased
+  low on spikes, and RMSE is the metric most sensitive to spikes.
+\end{itemize}
 
 %---------------------------------------------------------------------
 \subsection*{2.6 Final submission}
-\todo{Final configuration; how $E$ was obtained (early-stopping epochs + refit epochs, both
-counted); declared $P$ and $E$; reproduction command
-\texttt{python pipeline.py --final ...}; leaderboard score(s) and how they compare with the
-validation block-RMSE distribution.}
+\begin{itemize}
+  \item \textbf{Configuration:} the reference model with the $\log1p$ target (past+future external
+  features, daily phase, $L{=}336$, label 48, $d{=}32$, 1+1 layers). I chose it over the smaller
+  variants because it had the best mean RMSE, the lowest seed variance, and reliable early stopping.
+  RMSE dominates the score, and the smaller models' saving in $P$ came with higher $E$ and higher
+  variance.
+  \item \textbf{Training to produce the forecast} (one model, seed 0, no ensemble): early stopping
+  on the validation split ran 7 epochs (best epoch 5; validation RMSE 67.46, MAE 43.5, sMAPE 53.1).
+  The model was then \emph{refit on the full history} for 5 epochs, so that the most recent 6
+  months, which are closest to the hidden block, are used. Both phases are counted.
+  \item \textbf{Declared:} $\mathbf{P = 22{,}081}$ trainable parameters,
+  $\mathbf{E = 7 + 5 = 12}$ epochs.
+  \item \textbf{Reproduce:} \texttt{python pipeline.py --final --refit --exog full --target log
+  --stride 4 --max\_epochs 10 --patience 2 --seeds 0 --tag final}. This prints $P$ and $E$ and
+  writes \texttt{results/final\_submission.txt}.
+  \item \textbf{Sanity check of the forecast:} it is low (median 23.6, max 69.2). The supplied
+  covariates over the horizon explain this: feature D is high (mean 49 over steps 72--168) and
+  indicator H is active 62\% of the time. Historically, the target averages 23.4 under H with
+  D$>$50, against 98.2 overall. This is a covariate-driven ``clean period'' forecast, not a model
+  failure.
+  \item \textbf{Leaderboard:} \todo{score(s) per submission}. The validation per-block RMSE has
+  median 48.5 and mean 59.5 across 183 blocks, so a single 168-step score anywhere in that
+  range is consistent with validation and is not evidence for re-tuning.
+\end{itemize}
 
 %---------------------------------------------------------------------
 \subsection*{2.7 Limitations}

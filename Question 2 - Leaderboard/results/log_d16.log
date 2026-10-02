@@ -1,0 +1,33 @@
+DEBUG conda.gateways.logging:set_log_level(221): log_level set to 10
+DEBUG conda.gateways.subprocess:subprocess_call(97): executing>> C:\WINDOWS\system32\cmd.exe /d /c C:\Users\awais\AppData\Local\Temp\tmps2ern5m1.bat
+[log_d16] seed=0 params=5921 train_windows=9655 val_windows=183
+    {'epoch': 1, 'train_loss': 0.7916, 'sec': 2.5786, 'MAE': 48.1735, 'RMSE': 75.0749, 'sMAPE': 59.4077, 'block_RMSE_mean': 66.0467, 'block_RMSE_median': 52.5771}
+    {'epoch': 2, 'train_loss': 0.5461, 'sec': 2.0601, 'MAE': 46.0721, 'RMSE': 71.1392, 'sMAPE': 56.7178, 'block_RMSE_mean': 63.0991, 'block_RMSE_median': 52.3286}
+    {'epoch': 3, 'train_loss': 0.5119, 'sec': 2.1838, 'MAE': 46.3872, 'RMSE': 70.4396, 'sMAPE': 56.7571, 'block_RMSE_mean': 63.0276, 'block_RMSE_median': 53.2088}
+    {'epoch': 4, 'train_loss': 0.4901, 'sec': 2.4599, 'MAE': 45.3896, 'RMSE': 69.9639, 'sMAPE': 55.6748, 'block_RMSE_mean': 61.8779, 'block_RMSE_median': 50.7567}
+    {'epoch': 5, 'train_loss': 0.4755, 'sec': 2.4337, 'MAE': 44.1997, 'RMSE': 68.871, 'sMAPE': 54.3071, 'block_RMSE_mean': 60.8224, 'block_RMSE_median': 49.8738}
+    {'epoch': 6, 'train_loss': 0.4631, 'sec': 2.4518, 'MAE': 44.6043, 'RMSE': 68.5514, 'sMAPE': 54.6178, 'block_RMSE_mean': 60.8906, 'block_RMSE_median': 50.3913}
+    {'epoch': 7, 'train_loss': 0.4521, 'sec': 2.4371, 'MAE': 43.5324, 'RMSE': 67.4613, 'sMAPE': 53.4439, 'block_RMSE_mean': 60.1348, 'block_RMSE_median': 50.0667}
+    {'epoch': 8, 'train_loss': 0.441, 'sec': 2.4565, 'MAE': 43.3248, 'RMSE': 67.0332, 'sMAPE': 53.2002, 'block_RMSE_mean': 59.3259, 'block_RMSE_median': 47.9214}
+    {'epoch': 9, 'train_loss': 0.4352, 'sec': 2.4169, 'MAE': 42.3404, 'RMSE': 66.3273, 'sMAPE': 52.0107, 'block_RMSE_mean': 59.0328, 'block_RMSE_median': 49.773}
+    {'epoch': 10, 'train_loss': 0.4278, 'sec': 2.1147, 'MAE': 42.3487, 'RMSE': 66.3027, 'sMAPE': 52.1811, 'block_RMSE_mean': 59.137, 'block_RMSE_median': 49.8463}
+[log_d16] seed=0 RMSE=66.30 MAE=42.35 sMAPE=52.18 best_epoch=10/10
+[log_d16] seed=1 params=5921 train_windows=9655 val_windows=183
+    {'epoch': 1, 'train_loss': 0.7646, 'sec': 2.1064, 'MAE': 46.8784, 'RMSE': 72.1089, 'sMAPE': 58.0359, 'block_RMSE_mean': 63.1521, 'block_RMSE_median': 49.5529}
+    {'epoch': 2, 'train_loss': 0.5492, 'sec': 2.1368, 'MAE': 45.9587, 'RMSE': 69.3402, 'sMAPE': 56.5122, 'block_RMSE_mean': 61.4656, 'block_RMSE_median': 50.6018}
+    {'epoch': 3, 'train_loss': 0.5088, 'sec': 2.1221, 'MAE': 45.3755, 'RMSE': 68.9964, 'sMAPE': 55.6265, 'block_RMSE_mean': 61.0918, 'block_RMSE_median': 51.6301}
+    {'epoch': 4, 'train_loss': 0.482, 'sec': 2.1296, 'MAE': 46.7989, 'RMSE': 70.482, 'sMAPE': 56.6993, 'block_RMSE_mean': 62.4152, 'block_RMSE_median': 52.1016}
+    {'epoch': 5, 'train_loss': 0.4635, 'sec': 2.1132, 'MAE': 44.2115, 'RMSE': 68.1733, 'sMAPE': 54.6576, 'block_RMSE_mean': 60.7451, 'block_RMSE_median': 52.2369}
+    {'epoch': 6, 'train_loss': 0.4497, 'sec': 2.1137, 'MAE': 44.0285, 'RMSE': 67.651, 'sMAPE': 54.0921, 'block_RMSE_mean': 60.135, 'block_RMSE_median': 51.1557}
+    {'epoch': 7, 'train_loss': 0.4414, 'sec': 2.0824, 'MAE': 44.144, 'RMSE': 68.3649, 'sMAPE': 54.5988, 'block_RMSE_mean': 60.5654, 'block_RMSE_median': 52.8564}
+    {'epoch': 8, 'train_loss': 0.4362, 'sec': 2.1388, 'MAE': 43.1714, 'RMSE': 66.3315, 'sMAPE': 53.619, 'block_RMSE_mean': 58.8644, 'block_RMSE_median': 49.58}
+    {'epoch': 9, 'train_loss': 0.4302, 'sec': 2.1153, 'MAE': 45.2577, 'RMSE': 69.1868, 'sMAPE': 54.962, 'block_RMSE_mean': 60.9209, 'block_RMSE_median': 50.3266}
+    {'epoch': 10, 'train_loss': 0.4232, 'sec': 2.1647, 'MAE': 42.3977, 'RMSE': 65.1625, 'sMAPE': 53.052, 'block_RMSE_mean': 57.769, 'block_RMSE_median': 49.5418}
+[log_d16] seed=1 RMSE=65.16 MAE=42.40 sMAPE=53.05 best_epoch=10/10
+[log_d16] seed=2 params=5921 train_windows=9655 val_windows=183
+    {'epoch': 1, 'train_loss': 0.6798, 'sec': 2.1162, 'MAE': 47.0299, 'RMSE': 73.8994, 'sMAPE': 57.9646, 'block_RMSE_mean': 64.1685, 'block_RMSE_median': 50.4561}
+    {'epoch': 2, 'train_loss': 0.5588, 'sec': 2.1689, 'MAE': 46.3727, 'RMSE': 70.7581, 'sMAPE': 57.054, 'block_RMSE_mean': 62.3183, 'block_RMSE_median': 49.8748}
+    {'epoch': 3, 'train_loss': 0.5217, 'sec': 2.1267, 'MAE': 45.2792, 'RMSE': 71.209, 'sMAPE': 55.5699, 'block_RMSE_mean': 62.6115, 'block_RMSE_median': 51.2802}
+    {'epoch': 4, 'train_loss': 0.4894, 'sec': 2.2663, 'MAE': 45.4482, 'RMSE': 72.6942, 'sMAPE': 55.9079, 'block_RMSE_mean': 63.9055, 'block_RMSE_median': 53.809}
+[log_d16] seed=2 RMSE=70.76 MAE=46.37 sMAPE=57.05 best_epoch=2/4
+[log_d16] SUMMARY RMSE=67.41±2.96, MAE=43.71±2.31, sMAPE=54.10±2.60, block_RMSE_mean=59.74±2.33, epochs_run=8.00±3.46, best_epoch=7.33±4.62, fit_sec=18.28±8.46

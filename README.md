@@ -71,3 +71,19 @@ epochs). For an ensemble, both are summed over its members, and E includes any r
 Transformers with Auto-Correlation for Long-Term Series Forecasting*, and the structure of the
 authors' reference implementation, https://github.com/thuml/Autoformer. The module docstring lists
 the differences from that implementation.
+
+### Leaderboard attempt 3 (best): log + raw ensemble
+
+```bash
+cd "Question 2 - Leaderboard"
+python ensemble_members.py --targets log raw --seeds 0 1 2 3 4   # 10 validated members
+python ensemble_eval.py                                           # ensembles vs attempt 2 (bootstrap)
+python ensemble_weight.py                                         # log/raw mixing weight scan
+python make_submission.py --raw_weight 0.3 --tag mix_w03          # P = 220810, E = 47
+```
+
+| Attempt | Model | Val RMSE | Leaderboard RMSE | P | E |
+|---|---|---|---|---|---|
+| 1 | single log model + refit | (not validated) | 142.04 | 22,081 | 12 |
+| 2 | log ×3 ensemble | 63.95 | 112.15 | 66,243 | 17 |
+| 3 | 0.7·log ×5 + 0.3·raw ×5 | 62.05 | **102.21** | 220,810 | 47 |

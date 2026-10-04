@@ -1,0 +1,36 @@
+{
+ "members": [
+  "log_s0",
+  "log_s1",
+  "log_s2",
+  "log_s3",
+  "log_s4",
+  "raw_s0",
+  "raw_s1",
+  "raw_s2",
+  "raw_s3",
+  "raw_s4"
+ ],
+ "raw_weight": 0.3,
+ "P": 220810,
+ "E": 47,
+ "val": {
+  "MAE": 43.41051478167856,
+  "RMSE": 62.051910421436,
+  "sMAPE": 55.963591638822216,
+  "block_RMSE_mean": 56.298227095024295,
+  "block_RMSE_median": 46.35811020256481
+ },
+ "epochs_per_member": {
+  "log_s0": 7,
+  "log_s1": 6,
+  "log_s2": 4,
+  "log_s3": 9,
+  "log_s4": 4,
+  "raw_s0": 3,
+  "raw_s1": 3,
+  "raw_s2": 3,
+  "raw_s3": 4,
+  "raw_s4": 4
+ }
+}

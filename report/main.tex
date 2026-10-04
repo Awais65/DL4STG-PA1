@@ -458,20 +458,59 @@ Single seeds 0/1/2 & 67.46 / 65.80 / 67.15 & 43.5--44.5 & 100--106 & 127--141 & 
   \item \textbf{Reproduce:} \texttt{python pipeline.py --final --exog full --target log --stride 4
   --max\_epochs 10 --patience 2 --seeds 0 1 2 --tag final\_ensemble}.
   \item \textbf{Leaderboard:} RMSE \textbf{112.15}, MAE 71.5, sMAPE 60.4\%, score \textbf{112.16}.
-  That is 30 RMSE better than attempt \#1. This is the submission the leaderboard uses.
+  That is 30 RMSE better than attempt \#1.
+\end{itemize}
+
+\textbf{Attempt \#3: log + raw ensemble, chosen on validation.} Attempt \#2 showed that the size
+penalties are negligible, so larger ensembles cost almost nothing. I trained 5 log-target and 5
+raw-target members with the same validated early stopping and no refit
+(\texttt{ensemble\_members.py}). I then scored ensembles offline against attempt \#2 with a
+paired bootstrap over weeks of validation blocks (\texttt{ensemble\_eval.py}). Neighbouring blocks
+overlap, so the bootstrap resamples groups of 7 consecutive origins.
+\begin{center}\small
+\begin{tabular}{lcccccc}\toprule
+Ensemble & Val RMSE & $\Delta$ vs \#2 [90\% CI] & Block p97 & Bias (top quartile) & $P$ & $E$\\\midrule
+log $\times$3 (attempt \#2) & 63.95 & -- & 126 & $-36.8$ & 66{,}243 & 17\\
+log $\times$5 & 63.39 & $-0.55$ [$-1.39$, $+0.22$] & 127 & $-38.8$ & 110{,}405 & 30\\
+raw $\times$3 & 69.16 & $+5.21$ [$+1.31$, $+9.27$] & 114 & $-18.1$ & 66{,}243 & 9\\
+raw $\times$5 & 67.66 & $+3.71$ [$-0.21$, $+7.97$] & 113 & $-13.5$ & 110{,}405 & 17\\
+log $\times$5 + raw $\times$5 (equal) & 62.44 & $-1.51$ [$-3.65$, $+0.64$] & 117 & $-26.2$ & 220{,}810 & 47\\
+\textbf{0.7 log $\times$5 + 0.3 raw $\times$5} & \textbf{62.05} & -- & -- & -- & 220{,}810 & 47\\\bottomrule
+\end{tabular}\end{center}
+\begin{itemize}
+  \item \textbf{More log seeds alone barely help} ($-0.55$). Raw-target models alone are worse on
+  RMSE and far worse on MAE and sMAPE, but they are much \emph{less biased on high-level weeks}
+  ($-14$ to $-18$ vs.\ $-37$). The two errors are complementary, so mixing helps.
+  \item \textbf{Mixing weight} (\texttt{ensemble\_weight.py}): for $\hat y=(1-w)\,\bar y_\text{log}
+  + w\,\bar y_\text{raw}$, validation RMSE is flat for $w\in[0.2,0.5]$ and lowest at $w=0.3$
+  (62.05). Re-choosing $w$ on 2000 bootstrap resamples picks 0.2--0.4 in 87\% of them and $w=0$
+  (log only) in 0.2\%. A single scalar fitted on 183 blocks carries little overfitting risk, and
+  $w=0.3$ beats the equal mix on RMSE, MAE and sMAPE.
+  \item \textbf{Declared:} $P = 10\times22{,}081 = 220{,}810$; $E = 30 + 17 = 47$ (sum of each
+  member's early-stopping epochs). Reproduce: \texttt{python ensemble\_members.py --targets log
+  raw --seeds 0 1 2 3 4} then \texttt{python make\_submission.py --raw\_weight 0.3 --tag mix\_w03}.
+  Rebuilding the log $\times$3 ensemble from the saved members reproduces attempt \#2 exactly.
+  \item \textbf{Leaderboard:} RMSE \textbf{102.21}, MAE 64.5, sMAPE 56.5\%, score
+  \textbf{102.23}. This is the submission the leaderboard uses.
+  \item \textbf{Caveat:} the gain on validation was about 1.9 RMSE, and the confidence interval of
+  the closely related equal mix included zero. The 10-point leaderboard gain is therefore partly
+  luck on one week. The raw members also forecast a higher week, which attempt \#1 had already
+  suggested was the truth. I chose the candidate and its weight on validation only, but attempt
+  \#1's result is what motivated spending another attempt.
 \end{itemize}
 
 \textbf{Lessons.}
 \begin{itemize}
-  \item \textbf{Size penalties are tiny here.} Score $-$ RMSE was 0.006 for attempt \#1 and 0.009
-  for attempt \#2, despite 3$\times$ the parameters. Differences between designs are tens of RMSE
-  points, so on this leaderboard variance reduction is worth far more than parameter economy.
+  \item \textbf{Size penalties are tiny here.} Score $-$ RMSE was 0.006, 0.009 and 0.024 for
+  attempts \#1--\#3 ($P$ from 22k to 221k). Differences between designs are tens of RMSE points,
+  so on this leaderboard variance reduction is worth far more than parameter economy.
   \item \textbf{A good pooled validation score does not guarantee a good single-block score.}
   I should have checked the stability of the forecast at the actual forecast origin before the
   first submission, and not shipped an unvalidated refit.
-  \item \textbf{Transparency.} The leaderboard result \emph{prompted} the diagnosis. The switch to
-  the ensemble is justified by the validation table above, not by leaderboard feedback. No further
-  tuning was done on the leaderboard.
+  \item \textbf{Transparency.} Leaderboard results \emph{prompted} the diagnosis and the decision to
+  use more attempts. Each submitted candidate and its settings were chosen on the validation
+  evidence above; no setting was tuned to the leaderboard score. Two of the five attempts were left
+  unused.
 \end{itemize}
 
 %---------------------------------------------------------------------

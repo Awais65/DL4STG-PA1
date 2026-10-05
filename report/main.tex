@@ -24,12 +24,12 @@ in physical units (m/s$^2$), for the population named in each claim.
 %---------------------------------------------------------------------
 \subsection*{Response 1A -- Predicted vs.\ measured ordering}
 
-\textbf{Prediction (my expectation before running Output 1.1).} Established stations:
-Raw Attention $<$ period-routed ridge $<$ sensor-specific ridge $<$ shared ridge (best to worst).
-Held-out Station 4: Raw Attention $<$ period-routed ridge $<$ shared ridge (no sensor-specific model
-exists). My reasoning was that the most flexible model, which builds its mixing rule from each
-context, should beat every fixed linear map, and that a per-station fit should at least beat a
-single shared fit.
+\textbf{What I expected (before Output 1.1).} For the established stations I expected, from best
+to worst: Raw Attention, period-routed ridge, sensor-specific ridge, shared ridge. For Station 4 I
+expected the same order without the sensor-specific model, which cannot be fitted there. My
+reasoning was that Attention is the most flexible model and builds its mixing rule from each
+context, so it should beat any fixed linear map. I also thought a separate fit per station would
+at least do better than one shared fit.
 
 \begin{table}[h]\centering\small
 \begin{tabular}{lcccccccc}\toprule
@@ -45,34 +45,35 @@ Raw Attention         & 0.417 & 0.396 & 0.447 & 0.405 & 0.581 & 0.604 & 0.561 & 
 $<$0.05\,s for every ridge vs.\ $\approx$102\,s for Raw Attention.}
 \end{table}
 
-\textbf{Measured ordering} (both populations): period-routed ridge $<$ Raw Attention $<$ shared
-ridge $\approx$ sensor-specific ridge.
-\begin{itemize}
-  \item \textbf{Context beats identity.} Sensor-specific ridge is no better than shared ridge
-  (0.768 vs.\ 0.767): splitting by station does not remove the pace mixture, because every station
-  sees all three products. It also has no model for Station 4.
-  \item \textbf{Routing on the right variable wins by a lot.} Period-routed ridge cuts the
-  established RMSE by 78\% vs.\ shared ridge (0.767$\to$0.166) and is 2.5$\times$ better than Raw
-  Attention, using 6$\times$ fewer parameters and no training loop. Within one 1.5-sample pace
-  band the continuation \emph{is} close to a single linear map, so least squares no longer has to
-  compromise.
-  \item \textbf{Attention learns some context dependence, but not all.} Raw Attention halves the
-  shared-ridge error (0.767$\to$0.417) without being told the period, but it has to learn the
-  conditioning from data and carry the slow ramp in the same representation.
-  \item \textbf{Generalisation gap.} Moving from established stations to Station 4, period-routed
-  ridge degrades by only 4\% (0.166$\to$0.173), shared ridge by 14\%, and Raw Attention by 39\%
-  (0.417$\to$0.581). The hand-built router depends only on pace, which Station 4 shares; Attention
-  partly fits station-specific amplitude/offset/drift patterns.
-  \item \textbf{Products.} Ridge baselines are worst on Product B and best on Product C;
-  period-routed ridge is flat across products, which again shows that its error no longer depends
-  on which pace is active.
-\end{itemize}
-\textbf{Revision.} Two parts of my prediction were wrong. (i) Period-routed ridge, not Raw
-Attention, is best in both populations, by 2.5$\times$ on the established stations (0.166 vs.\
-0.417) and 3.4$\times$ on Station 4 (0.173 vs.\ 0.581). Being told the right conditioning variable
-was worth more than flexibility. (ii) Sensor-specific ridge gives no gain over shared ridge
-(0.768 vs.\ 0.767), because station identity is not the variable that changes the continuation.
-Only the relative order of Raw Attention and the two unconditioned ridges matched my expectation.
+\textbf{What happened.} The measured order is the same for both populations: period-routed ridge
+is best, then Raw Attention, then shared and sensor-specific ridge, which are tied.
+
+Sensor-specific ridge is no better than shared ridge (0.768 vs.\ 0.767). Every station runs all
+three products, so splitting the data by station still leaves each matrix fitting a mix of paces.
+It also cannot be used for Station 4 at all.
+
+Period-routed ridge is the clear winner. It cuts the shared-ridge RMSE by 78\% (0.767 to 0.166)
+and is 2.5 times better than Raw Attention, with 6 times fewer parameters and no training loop.
+Inside one 1.5-sample pace band the continuation really is close to one linear map, so least
+squares no longer has to average over incompatible paces.
+
+Raw Attention roughly halves the shared-ridge error (0.767 to 0.417) without being given the
+period, so it does learn some context dependence. But it has to discover the conditioning from
+data, and the same representation also has to carry the slow drift ramp.
+
+The gap between populations is informative. From the established stations to Station 4,
+period-routed ridge gets only 4\% worse (0.166 to 0.173), shared ridge 14\%, and Raw Attention 39\%
+(0.417 to 0.581). The router depends only on pace, which Station 4 shares with the others, while
+Attention seems to partly fit station-specific amplitude, offset and drift. Across products the
+ridge baselines are worst on B and best on C, while period-routed ridge is flat, which again
+suggests its error no longer depends on which pace is active.
+
+\textbf{Revising my prediction.} I got two things wrong. First, period-routed ridge, not Raw
+Attention, is best: 2.5 times better on the established stations (0.166 vs.\ 0.417) and 3.4 times
+better on Station 4 (0.173 vs.\ 0.581). Knowing the right conditioning variable was worth more than
+flexibility. Second, sensor-specific ridge gives no gain, because station identity is not what
+changes the continuation. Only the placement of Raw Attention above the two unconditioned ridges
+matched what I expected.
 
 %---------------------------------------------------------------------
 \subsection*{Response 1B -- Why the rule must depend on context}
@@ -82,27 +83,26 @@ Only the relative order of Raw Attention and the two unconditioned ridges matche
 \caption{Output 1.2: Station 1, validation; Product A (period 16.1) and Product C (period 30.1).}
 \end{figure}
 
-\begin{itemize}
-  \item \textbf{The compromise.} $\widehat W$ in Eq.~(8) is fit once over windows whose periods span
-  14--36 samples. For one anchored context, the correct next peak lies at a phase advance that
-  depends on $P$; a single linear operator cannot choose between these, so least squares returns
-  roughly an \emph{average} of the continuations for all paces. Averaging sinusoids with different
-  periods produces \textbf{amplitude shrinkage and phase blurring}.
-  \item \textbf{Visible in Output 1.2.} For Product A, shared and sensor-specific ridge get the
-  first peak roughly right, then flatten: their second and third peaks are about 1\,m/s$^2$ too low
-  and their troughs about 1\,m/s$^2$ too high (window RMSE 0.78 vs.\ 0.23 for period-routed ridge).
-  For Product C they miss the second trough and peak near 1.5--2\,s (window RMSE 0.45 vs.\ 0.15).
-  The error grows with lead time because the phase mismatch accumulates.
-  \item \textbf{Attention builds a new operator per context.} $W_Q,W_K,W_V$ are frozen after
-  training, but the mixing matrix $\mathrm{softmax}(QK^\top/\sqrt{d_h})$ is a function of the
-  current window $X$. In Output 1.3, the same Station 1 projections produce visibly different maps
-  for the Product A and Product C contexts: the differences are concentrated near the most recent
-  keys, the maximum absolute weight difference is 0.43, and the mean is 0.013. So the
-  value-mixing operation, and hence the effective linear map applied to the values, changes with the
-  input, while ridge applies the same $\widehat W$ to both.
-  \item \textbf{Caveat.} Output 1.3 shows only that the mixing weights depend on context. It is not
-  evidence that Attention has recovered the physical period.
-\end{itemize}
+The ridge map $\widehat W$ in Eq.~(8) is fitted once, over windows whose periods range from 14 to
+36 samples. For a given context, where the next peak falls depends on the period. One fixed linear
+operator cannot pick the right phase advance for each context, so least squares ends up returning
+something like an average of the continuations for all paces. Averaging sine waves of different
+periods gives a forecast with a smaller amplitude and a blurred phase.
+
+Output 1.2 shows exactly this. For Product A, shared and sensor-specific ridge get the first peak
+roughly right and then flatten out: the second and third peaks are about 1\,m/s$^2$ too low and
+the troughs about 1\,m/s$^2$ too high (window RMSE 0.78, against 0.23 for period-routed ridge). For
+Product C they miss the second trough and peak around 1.5--2\,s (0.45 vs.\ 0.15). The error grows
+with lead time because the phase mismatch builds up.
+
+Attention avoids this compromise because its mixing weights are recomputed for every input. The
+projections $W_Q, W_K, W_V$ are fixed after training, but the weight matrix
+$\mathrm{softmax}(QK^\top/\sqrt{d_h})$ is a function of the current window. In Output 1.3 the same
+Station 1 projections give clearly different maps for the Product A and Product C contexts. The
+differences are concentrated on the most recent keys, with a maximum absolute difference of 0.43
+and a mean of 0.013. So the way values are mixed changes with the input, whereas ridge applies the
+same $\widehat W$ to both contexts. Output 1.3 only shows that the weights depend on the context;
+it does not show that Attention has found the physical period.
 
 \begin{figure}[h]\centering
 \includegraphics[width=\linewidth]{1.3-1.pdf}
@@ -112,48 +112,48 @@ Only the relative order of Raw Attention and the two unconditioned ridges matche
 %---------------------------------------------------------------------
 \subsection*{Response 2 -- Separating slow structure from repetition}
 
-\textbf{Selected width: $m=41$.}
-\begin{itemize}
-  \item \textbf{Visual (Output 2.1, Station 2, Product C, validation).} With narrow widths (17, 25)
-  the trend still wiggles with the vibration, so part of the cycle leaks into $T$ and the remainder
-  is damped (residual std 0.58\,m/s$^2$ at $m=17$). As $m$ grows the trend becomes a smooth ramp
-  and the remainder becomes a full-amplitude, zero-centred oscillation (std 1.57 at $m=41$). The
-  projection score at the true period (32) is sharp after decomposition and almost flat on the raw
-  context. The endpoints use replicate padding, so the last $\approx$20 samples of $T$ flatten
-  towards the final value; this is visible at the right edge of the plot.
-  \item \textbf{Oracle diagnostic (Output 2.2, established stations, training region only).}
-  Recovery of the true period to within one sample rises from 68.7\% on the raw context to
-  98.0 / 98.9 / 99.3 / \textbf{99.8}\% for $m=17/25/33/41$.
-  \item \textbf{Ablation (Output 2.3, validation).} Adding decomposition to the same Attention
-  forecaster lowers the RMSE for every product and both populations:
-  \begin{center}\small
-  \begin{tabular}{lcccccc}\toprule
-   & \multicolumn{3}{c}{Established} & \multicolumn{3}{c}{Held-out Station 4}\\
-   \cmidrule(lr){2-4}\cmidrule(lr){5-7}
-   & A & B & C & A & B & C\\\midrule
-   Raw Attention & 0.396 & 0.447 & 0.405 & 0.604 & 0.561 & 0.576\\
-   Attention + decomposition & \textbf{0.277} & \textbf{0.339} & \textbf{0.288} & \textbf{0.397} & \textbf{0.482} & \textbf{0.466}\\
-   Relative change & $-30\%$ & $-24\%$ & $-29\%$ & $-34\%$ & $-14\%$ & $-19\%$\\\bottomrule
-  \end{tabular}\end{center}
-  It still does not match period-routed ridge (0.15--0.18).
-  \item \textbf{Why a moving average is the right bias here.} The world is a slow component
-  (240-sample time scale) plus a fast cycle (14--36 samples). A moving average is a low-pass
-  filter: with a width at least as long as the vibration period, the cycle averages to roughly zero
-  inside the window, while the slow component, which is nearly linear over 41 samples, passes
-  through. The trend head can then extrapolate the ramp linearly, and the encoder sees a
-  zero-mean repeating signal.
-  \item \textbf{Why the oracle diagnostic is a sound way to pick $m$.} The goal of the split is to
-  expose the repetition. Period recovery measures that directly, using the generator's known
-  period on \emph{training} windows from established stations only, so the validation set,
-  Station 4 and the test set do not influence the choice of $m$. The true period is used only for
-  scoring, never as a model input.
-  \item \textbf{Where it fails or an alternative.} A centered moving average assumes the trend is
-  locally linear and changes much more slowly than the width. An abrupt level shift (e.g.\ a
-  calibration jump) would be smeared over $m$ samples and leak a step-shaped artefact into $S$.
-  \textbf{Alternative:} STL/LOESS or a Fourier low-pass decomposition encodes ``the trend is the
-  low-frequency band'' and adapts to curvature better, but it needs a cutoff frequency and is
-  costlier to apply inside every block.
-\end{itemize}
+I selected a width of $m=41$.
+
+\textbf{What changes.} In Output 2.1 (Station 2, Product C, validation), the narrow widths (17 and
+25) leave a trend that still wiggles with the vibration. Part of the cycle leaks into $T$, and the
+remainder is damped (residual std 0.58\,m/s$^2$ at $m=17$). As $m$ grows, the trend becomes a
+smooth ramp and the remainder becomes a full-size oscillation centred on zero (std 1.57 at
+$m=41$). After decomposition the projection score has a sharp peak at the true period (32); on the
+raw context it is almost flat. Near the right edge, replicate padding makes the last $\approx$20
+samples of $T$ flatten towards the final value, which is visible in the plot.
+
+In the oracle diagnostic (Output 2.2, established stations, training data only), the share of
+windows whose period is recovered to within one sample rises from 68.7\% on the raw context to
+98.0, 98.9, 99.3 and 99.8\% for $m=$ 17, 25, 33 and 41. In the ablation (Output 2.3, validation),
+adding decomposition to the same Attention forecaster lowers RMSE for every product in both
+populations:
+\begin{center}\small
+\begin{tabular}{lcccccc}\toprule
+ & \multicolumn{3}{c}{Established} & \multicolumn{3}{c}{Held-out Station 4}\\
+ \cmidrule(lr){2-4}\cmidrule(lr){5-7}
+ & A & B & C & A & B & C\\\midrule
+ Raw Attention & 0.396 & 0.447 & 0.405 & 0.604 & 0.561 & 0.576\\
+ Attention + decomposition & \textbf{0.277} & \textbf{0.339} & \textbf{0.288} & \textbf{0.397} & \textbf{0.482} & \textbf{0.466}\\
+ Relative change & $-30\%$ & $-24\%$ & $-29\%$ & $-34\%$ & $-14\%$ & $-19\%$\\\bottomrule
+\end{tabular}\end{center}
+Even so, it is still well behind period-routed ridge (0.15--0.18).
+
+\textbf{Why a moving average suits this data.} The signal is a slow component (240-sample time
+scale) plus a fast cycle (14--36 samples). A moving average is a low-pass filter. When its width is
+at least one vibration period, the cycle roughly averages out inside the window, while the slow
+part, which is nearly linear over 41 samples, passes through. The trend head can then extend the
+ramp linearly, and the encoder sees a zero-mean repeating signal.
+
+\textbf{Why the oracle diagnostic is a fair way to choose $m$.} The point of the split is to expose
+the repetition, and period recovery measures that directly. It uses the generator's true period,
+but only to score training windows from the established stations, so validation, Station 4 and
+the test set play no part in choosing $m$. The true period is never a model input.
+
+\textbf{Where it would fail.} A centred moving average assumes the trend is locally linear and much
+slower than the window. An abrupt level shift, such as a calibration jump, would be smeared over
+$m$ samples and leave a step-shaped artefact in $S$. An alternative is STL/LOESS or a Fourier
+low-pass split, which assumes the trend is simply the low-frequency band. It copes better with
+curvature, but it needs a cut-off frequency and is more expensive to apply inside every block.
 
 \begin{figure}[h]\centering
 \includegraphics[width=\linewidth]{2.1-1.pdf}
@@ -163,10 +163,10 @@ Only the relative order of Raw Attention and the two unconditioned ridges matche
 %---------------------------------------------------------------------
 \subsection*{Response 3 -- Mixing by temporal delay}
 
-\texttt{aggregate\_delays} implements Eq.~(6) with a per-example \texttt{gather} on the index
-$(t-\tau_j)\bmod L$. The worked example gives $z=[35,15,25,25]$ (so $z_0=35$ and the direction is
-correct), and the notebook's value and gradient checks pass. Output 3.1 confirms
-\texttt{delay\_scores} on $[1,3,1,3]$: scores $[4,-4,4,-4]$.
+I implemented \texttt{aggregate\_delays} (Eq.~6) with a per-example \texttt{gather} on the index
+$(t-\tau_j)\bmod L$. On the worked example it returns $z=[35,15,25,25]$; $z_0=35$ confirms that the
+shift runs in the right direction. The notebook's value and gradient checks pass, and Output 3.1
+confirms the supplied \texttt{delay\_scores} on $[1,3,1,3]$ (scores $[4,-4,4,-4]$).
 
 \begin{figure}[h]\centering
 \includegraphics[width=\linewidth]{3.2-1.pdf}
@@ -175,27 +175,26 @@ $P\approx16.1$). This is a correlation computed directly from the signal, \emph{
 model's learned $q/k$ scores.}
 \end{figure}
 
-\begin{itemize}
-  \item \textbf{Strongest lags.} The residual correlation peaks at delay 16 (0.896) and 32
-  (0.897), the nearest integers to $P=16.1$ and $2P=32.3$. It has troughs of about $-0.9$ near
-  $P/2\approx 8$, $3P/2\approx24$ and $5P/2\approx40$, and rises again towards $3P\approx48$. The
-  recurrence sits on integer multiples of the run's period.
-  \item \textbf{Why decomposition cleans the evidence.} The raw-signal correlation simply decays
-  from 0.45 to about $-0.55$ across the band and has \emph{no} peak at $P$. A rising ramp
-  correlates with itself at every small shift, and circular wrapping joins the high end of the ramp
-  to its low start, so the ramp dominates the score. Removing the trend leaves a zero-mean
-  oscillation in which aligned peaks add and misaligned ones cancel. The top-$K$ selection then
-  picks $P$ and its multiples instead of the smallest delays. This supports the delay mixer's
-  assumption: once drift is removed, the useful relationships really are organised by a few
-  displacements.
-  \item \textbf{When the bias is wrong.} \emph{Isolated transients}, such as a one-off impact
-  inside the context: delay aggregation copies values from $t-\tau_j$, so the spike is replayed
-  every $\tau_j$ samples into the representation and forecast, producing ``ghost'' echoes of an
-  event that will not recur. Similarly, a \emph{period that drifts within the window} (a machine
-  spinning up) has no single lag that aligns the whole window, so the correlation peaks smear out
-  and the blended shifted copies go out of phase. Pairwise Attention can treat each position on
-  its content and does not have this problem.
-\end{itemize}
+\textbf{Strongest lags.} The residual correlation peaks at delays 16 (0.896) and 32 (0.897), the
+integers closest to $P=16.1$ and $2P=32.3$. It drops to about $-0.9$ near $P/2\approx8$,
+$3P/2\approx24$ and $5P/2\approx40$, and rises again towards $3P\approx48$. So the recurrence sits
+on whole multiples of the run's period.
+
+\textbf{Why removing the drift helps.} On the raw signal the correlation just decays from 0.45 to
+about $-0.55$ across the band, with no peak at $P$. A rising ramp looks similar to itself at every
+small shift, and the circular wrap joins the high end of the ramp to its low start, so the ramp
+dominates the score. Once the trend is removed, what is left oscillates around zero: aligned peaks
+add up and misaligned ones cancel. Top-$K$ selection then picks $P$ and its multiples rather than
+the smallest delays. This supports the delay mixer's assumption that, once the drift is gone, the
+useful relationships are organised by a few displacements.
+
+\textbf{When this assumption is wrong.} Take an isolated transient, such as a single impact inside
+the context. Delay aggregation copies values from $t-\tau_j$, so the spike gets replayed every
+$\tau_j$ samples into the representation and the forecast, creating echoes of an event that will
+not happen again. A period that drifts within the window, as when a machine is spinning up, is
+another problem: no single lag lines up the whole window, the correlation peaks smear out, and the
+blended shifted copies drift out of phase. Pairwise Attention judges each position on its own
+content, so it does not suffer from either problem in the same way.
 
 %---------------------------------------------------------------------
 \subsection*{Response 4 -- Compare designs and deploy}
@@ -222,25 +221,25 @@ Attention + decomposition & 0.302 & 0.091 & 0.450 & 0.202 & 373{,}024 & 188.3\\
 Raw delay mixer           & 0.230 & 0.053 & 0.346 & 0.119 & 368{,}370 & 305.5\\
 Autoformer-inspired       & 0.196 & 0.038 & 0.245 & 0.060 & 373{,}026 & 142.7\\\bottomrule
 \end{tabular}\end{center}
-\begin{itemize}
-  \item \textbf{Each switch helps on its own; delay mixing helps more.} Relative to Raw Attention
-  (established MSE 0.174): decomposition $-0.082$ ($-47\%$), delay mixing $-0.121$ ($-70\%$), both
-  together $-0.135$ ($-78\%$). Held-out Station 4 shows the same pattern (0.338 $\to$ 0.202 / 0.119
-  / 0.060).
-  \item \textbf{The gains overlap rather than add.} The sum of the individual MSE gains (0.203)
-  exceeds the combined gain (0.135), so the interaction is sub-additive. This fits the fact that
-  both switches target the same drift-plus-repetition structure: once the mixer is organised by
-  delay, part of what decomposition fixes is already handled. This is an empirical observation
-  from one seed, not a causal identification.
-  \item \textbf{Horizon (Output 4.2, established).} Every model's error grows with lead time, but at
-  different rates. From $h{=}1$ to $h{=}48$: Raw Attention $0.144\to0.488$ ($3.4\times$),
-  Attention+decomposition $0.149\to0.421$, Raw delay mixer $0.119\to0.373$ (it degrades
-  sharply after $h\approx36$), Autoformer-inspired $0.132\to0.242$ ($1.8\times$), and
-  period-routed ridge $0.112\to0.228$. The flatter curves belong to the models whose structure
-  fixes the phase, either through the routed period or through a clean delay. The flattening shows
-  that phase drift is the main source of long-horizon error. Station 4 has the same ordering, with
-  larger gaps (Raw Attention reaches 0.768 at $h{=}48$, period-routed ridge 0.212).
-\end{itemize}
+
+Both switches help on their own, and delay mixing helps more. Starting from Raw Attention
+(established MSE 0.174), decomposition lowers MSE by 0.082 (47\%), delay mixing by 0.121 (70\%), and
+the two together by 0.135 (78\%). Station 4 shows the same pattern (0.338 to 0.202, 0.119 and
+0.060).
+
+The gains overlap rather than add up. The two individual gains sum to 0.203, more than the combined
+gain of 0.135. This fits the fact that both switches target the same drift-plus-repetition
+structure: once the mixer works by delay, part of what decomposition fixes is already handled.
+This is an observation from one seed, not a causal explanation.
+
+Across the horizon (Output 4.2, established stations), every model's error grows with lead time,
+but at very different rates. From step 1 to step 48, Raw Attention goes from 0.144 to 0.488 (3.4
+times), Attention + decomposition from 0.149 to 0.421, the raw delay mixer from 0.119 to 0.373
+(with a sharp rise after step 36), Autoformer-inspired from 0.132 to 0.242 (1.8 times), and
+period-routed ridge from 0.112 to 0.228. The flattest curves belong to the models whose structure
+pins down the phase, through the routed period or a clean delay, which suggests that phase drift
+is the main source of long-horizon error. Station 4 has the same ordering with bigger gaps: at step
+48 Raw Attention reaches 0.768 and period-routed ridge 0.212.
 
 \begin{figure}[h]\centering
 \includegraphics[width=.8\linewidth]{4.2-1.pdf}
@@ -249,22 +248,21 @@ Autoformer-inspired       & 0.196 & 0.038 & 0.245 & 0.060 & 373{,}026 & 142.7\\\
 
 \textbf{(c) Deployment choices} (entered in the notebook before Output 4.3 was run).
 
-\emph{Established stations: period-routed ridge.} It has the lowest validation RMSE (0.166 vs.\
+\emph{Established stations: period-routed ridge.} It has the lowest validation RMSE (0.166, against
 0.196 for the best neural model, Autoformer-inspired) and the lowest MSE (0.028 vs.\ 0.038). It
-uses 6$\times$ fewer parameters (59.9k vs.\ 373k) and fits in milliseconds instead of minutes. Its
-error also grows the least with lead time.
+also uses 6 times fewer parameters (59.9k vs.\ 373k), fits in milliseconds rather than minutes, and
+its error grows the least with lead time.
 
-\emph{Held-out Station 4: period-routed ridge.} Its advantage widens on the unseen station (0.173
-vs.\ 0.245), because its conditioning variable, the estimated pace, is shared by all stations,
+\emph{Held-out Station 4: period-routed ridge.} Its lead grows on the unseen station (0.173 vs.\
+0.245), because the variable it conditions on, the estimated pace, is shared by every station,
 while the neural models partly fit station-specific patterns. Sensor-specific ridge cannot be used
-here.
+here at all.
 
-\emph{Answer to the central question.} In this world, the right inductive bias was worth more than
-flexibility. A linear model told which variable matters beat every 370k-parameter network, and
-among the networks the two structural switches mattered more than raw capacity. The caveat is that
-the routed ridge depends on a hand-designed period estimator and pace bands that fit this
-simulator exactly, and the Autoformer-inspired model is the strongest choice that does not need
-that knowledge.
+\emph{Central question.} Here the right inductive bias was worth more than flexibility. A linear
+model that is told which variable matters beat every 370k-parameter network, and among the
+networks the two structural switches mattered more than raw capacity. The catch is that the routed
+ridge relies on a hand-designed period estimator and pace bands that suit this simulator exactly;
+without that knowledge, Autoformer-inspired is the strongest choice.
 
 \textbf{Final test results (Output 4.3).} Both choices were entered before this cell was run.
 \begin{center}\small
@@ -273,14 +271,14 @@ Population & Model & Val.\ MSE & Val.\ RMSE & Test MSE & Test RMSE\\\midrule
 Established (1--3) & Period-routed ridge & 0.0275 & 0.166 & 0.0260 & 0.161\\
 Held-out Station 4 & Period-routed ridge & 0.0298 & 0.173 & 0.0333 & 0.183\\\bottomrule
 \end{tabular}\end{center}
-The test errors stay within about 6\% of validation for both populations, so the validation-based
-choice held up on unseen data.
+Test errors are within about 6\% of validation for both populations, so the choice made on
+validation held up on unseen data.
 
 %=====================================================================
 \section*{Task 2 -- Leaderboard Challenge}
 
 \noindent Code: \texttt{Question 2 - Leaderboard/} (\texttt{autoformer.py}, \texttt{pipeline.py},
-\texttt{eda\_figure.py}). Every number below is reproducible with the command given next to it.
+\texttt{eda\_figure.py}). The README lists the command that reproduces each number below.
 
 %---------------------------------------------------------------------
 \subsection*{2.1 What the data look like}
@@ -290,81 +288,80 @@ choice held up on unseen data.
 \caption{Training target: last 1000 steps, ACF, and periodogram.}
 \end{figure}
 
-\begin{itemize}
-  \item \textbf{Episodic and heavy-tailed.} The median is 73, the 99th percentile 418 and the max
-  994. The series rises in multi-day episodes and then collapses abruptly. The periodogram is
-  ``red'', with power rising towards long periods, so most of the variance is aperiodic episode
-  structure rather than a cycle.
-  \item \textbf{Short memory.} The ACF is 0.97 at lag 1, 0.57 at 12, 0.40 at 24, 0.16 at 48 and
-  about 0.02 by 96. Beyond roughly two days the target's own history says little about the future.
-  At $H{=}168$ most of the horizon is therefore beyond the target's own memory.
-  \item \textbf{Recovered period.} With no timestamps, the periodogram shows clear peaks at
-  \textbf{24} and its harmonic \textbf{12}, and the ACF has small bumps at 24, 48 and 72. I treat
-  one step as one hour with a daily cycle and encode the phase $(\texttt{time\_idx} \bmod 24)$ as
-  $\sin/\cos$ covariates. This is the only structure derived from the index. The ACF at 168 is
-  0.03, so a weekly cycle is not used.
-  \item \textbf{External file.} It has six continuous features (A--F) and four mutually exclusive
-  binaries (G--J; exactly one is active at each step). Both are consistent with meteorological
-  measurements, e.g.\ a categorical wind direction. Feature D (correlation $-0.35$ with
-  $\log(1{+}y)$) and indicator H ($-0.35$; mean target 70 when active vs.\ 125 for J) are the most
-  informative, so the covariates plausibly drive the \emph{onset and clearing} of episodes.
-\end{itemize}
+The series is episodic and heavy-tailed: the median is 73, the 99th percentile 418 and the
+maximum 994. It builds up over episodes lasting a few days and then drops sharply. The periodogram
+is ``red'' (power rises towards long periods), so most of the variance comes from these irregular
+episodes rather than from a regular cycle.
+
+Its memory is short. The ACF is 0.97 at lag 1, 0.57 at 12, 0.40 at 24, 0.16 at 48 and about 0.02
+by 96. Beyond about two days, the past of the target says little about its future, so most of the
+168-step horizon lies outside what the target's own history can predict.
+
+There are no timestamps, but the periodogram has clear peaks at 24 and its harmonic 12, and the
+ACF has small bumps at 24, 48 and 72. I therefore treat one step as one hour with a daily cycle,
+and add the phase $(\texttt{time\_idx} \bmod 24)$ as $\sin/\cos$ features. This is the only thing
+I derive from the index. The ACF at 168 is only 0.03, so I do not model a weekly cycle.
+
+The external file has six continuous features (A--F) and four binary ones (G--J), exactly one of
+which is active at each step. They look like weather measurements, with G--J something like a
+wind-direction category. Feature D (correlation $-0.35$ with $\log(1{+}y)$) and indicator H
+($-0.35$; the target averages 70 when H is active against 125 for J) are the most informative. This
+suggests the covariates drive when episodes start and end.
 
 %---------------------------------------------------------------------
 \subsection*{2.2 Validation protocol}
 
-\begin{itemize}
-  \item \textbf{Chronological split.} Training targets lie strictly before step 39{,}120. The
-  validation targets are the final 4{,}536 observed steps (about 6 months), so validation sits
-  directly before the hidden block, which follows step 43{,}656.
-  \item \textbf{Many blocks, not one.} Validation forecast origins are every 24 steps, giving
-  \textbf{183 overlapping 168-step forecasts}. I report pooled RMSE, MAE and sMAPE, plus the mean
-  per-block RMSE. A single 168-step leaderboard score is one draw from that block-to-block
-  distribution, so it is used only as confirmation.
-  \item \textbf{Leakage control.} Target and covariate scalers (mean/std, with $\log1p$ applied to
-  the skewed cumulative features D, E and F) are fitted on the training region only.
-  \item \textbf{Seeds.} Every configuration is run with seeds $\{0,1,2\}$ and reported as mean
-  $\pm$ std. A difference counts only if it clearly exceeds the seed spread.
-  \item \textbf{Baselines} on the same 183 blocks (RMSE): training mean \textbf{87.8}, mean of last
-  7 days 94.8, seasonal-naive (24) 117.9, persistence 122.2. The training mean beats persistence
-  because 168 steps is well beyond the ACF memory, which shows how hard this horizon is.
-\end{itemize}
+I split the data chronologically. Training targets end before step 39{,}120, and validation
+targets are the last 4{,}536 observed steps (about 6 months), immediately before the hidden block
+that starts after step 43{,}656. Validation forecasts start every 24 steps, which gives 183
+overlapping 168-step forecasts. I report pooled RMSE, MAE and sMAPE, plus the mean RMSE per block.
+A single leaderboard score is just one draw from this spread of block scores, so I treat it as a
+check rather than something to tune on.
+
+All scalers are fitted on the training region only (mean and standard deviation, with $\log1p$
+applied first to the skewed cumulative features D, E and F). Every configuration is run with seeds
+0, 1 and 2 and reported as mean $\pm$ std; I only treat a difference as real if it is clearly
+larger than the spread across seeds.
+
+On the same 183 blocks, the simple baselines score (RMSE): training mean 87.8, mean of the last 7
+days 94.8, seasonal naive (lag 24) 117.9 and persistence 122.2. The training mean beats persistence
+because 168 steps is far beyond the ACF memory, which shows how hard this horizon is.
 
 %---------------------------------------------------------------------
 \subsection*{2.3 Model}
 
-Autoformer, written from scratch following Wu et al.\ (2021) \S\S3.1--3.2 and the structure of
-the authors' reference implementation (\url{https://github.com/thuml/Autoformer}). Both
-mechanisms required by \S2.4 are present:
-\begin{itemize}
-  \item \textbf{Series decomposition}: a centered moving average (kernel 25, about one daily cycle,
-  with replicate padding) is applied to the input and inside \emph{every} encoder layer
-  (2$\times$) and decoder layer (3$\times$). The decoder accumulates the extracted trend parts
-  through a projection into the trend stream, which is initialised with the input's trend and the
-  input mean.
-  \item \textbf{Auto-Correlation} in place of dot-product attention: FFT-based delay scores
-  $R(\tau)=\sum_t q_t k_{t-\tau}$, top-$k$ delays with $k=\lfloor \ln L\rfloor$ (factor $c{=}1$),
-  softmax weights, and per-example time-delay aggregation of $v_{t-\tau}$. This is the same
-  convention as my Task 1 \texttt{aggregate\_delays}. The reference code shares delays across the
-  batch during training and reads $v_{t+\tau}$; I keep the Task 1 convention so that the value
-  read back comes from the key position that scored.
-  \item \textbf{Inputs.} The encoder sees $L$ past target values plus, at every step, the
-  covariates (external features and daily phase) through a linear ``mark'' embedding. The decoder
-  receives the last 48 steps' seasonal part plus zeros for the 168 future steps, and \emph{the
-  covariates over the label and forecast window}. This is where future-known information enters an
-  encoder--decoder model.
-  \item \textbf{Size.} $d_\text{model}{=}32$, 4 heads, $d_\text{ff}{=}64$, 1 encoder and 1 decoder
-  layer, giving about 22k trainable parameters. The leaderboard penalises parameters, so I started
-  small and would grow the model only if validation justified it.
-  \item \textbf{Training.} MSE on the standardised target (it matches the RMSE ranking metric),
-  AdamW (lr $10^{-3}$, weight decay $10^{-4}$), batch 64, gradient clipping at 1, and every 4th
-  training window per epoch. Early stopping uses validation RMSE with patience 2.
-\end{itemize}
+I wrote the Autoformer from scratch, following Wu et al.\ (2021, \S\S3.1--3.2) and the structure
+of the authors' reference code (\url{https://github.com/thuml/Autoformer}). It contains both
+mechanisms the assignment requires.
+
+\textbf{Series decomposition.} A centred moving average (kernel 25, about one day, with replicate
+padding) is applied to the input and inside every encoder layer (twice) and decoder layer (three
+times). The decoder adds up the trend parts it removes, through a projection, into a trend stream
+that starts from the input's trend and mean.
+
+\textbf{Auto-Correlation} replaces dot-product attention. Delay scores
+$R(\tau)=\sum_t q_t k_{t-\tau}$ are computed with the FFT, the top $k=\lfloor \ln L\rfloor$ delays
+are kept, their scores are turned into softmax weights, and values $v_{t-\tau}$ are aggregated per
+example. This is the same convention as my Task 1 \texttt{aggregate\_delays}. The reference code
+shares delays across the batch during training and reads $v_{t+\tau}$; I kept the Task 1
+convention so that the value read back comes from the key position that produced the score.
+
+\textbf{Inputs.} The encoder sees the last $L$ target values plus, at every step, the covariates
+(external features and daily phase) through a linear embedding. The decoder gets the seasonal part
+of the last 48 steps, zeros for the 168 future steps, and the covariates over both. This is how
+covariates that are known for the future enter the model.
+
+\textbf{Size and training.} I used $d_\text{model}=32$, 4 heads, $d_\text{ff}=64$, and one encoder
+and one decoder layer, about 22k trainable parameters. Since the leaderboard penalises parameters,
+I started small and planned to grow the model only if validation justified it. The loss is MSE on
+the standardised target, which matches the RMSE ranking. I used AdamW (learning rate $10^{-3}$,
+weight decay $10^{-4}$), batch size 64, gradient clipping at 1, and every 4th training window per
+epoch, with early stopping on validation RMSE (patience 2).
 
 %---------------------------------------------------------------------
 \subsection*{2.4 Does the external file help? (required ablation)}
 
-The same model was trained in three modes, 3 seeds each, on the validation protocol above
+I trained the same model three ways, 3 seeds each, under the protocol above
 (\texttt{python pipeline.py --exog \{none,past,full\}}):
 \begin{center}\small
 \begin{tabular}{lcccc}\toprule
@@ -375,28 +372,29 @@ Past only (up to the forecast origin)          & 88.91 $\pm$ 0.44 & 69.3 $\pm$ 1
 \midrule
 \emph{Training-mean baseline} & 87.8 & 67.9 & 79.4 & 80.9\\\bottomrule
 \end{tabular}\end{center}
-\begin{itemize}
-  \item \textbf{Clear positive result, but only for the future part.} Feeding the covariates over
-  the forecast window lowers RMSE by 18.5 (about 21\%), which is more than 10 seed standard
-  deviations. Past-only covariates change RMSE by 0.7, which is within seed noise.
-  \item \textbf{Why the portion matters.} The ACF shows that the target forgets its past within
-  about 2--4 days, and past covariates carry largely the same information as the past target. What
-  decides the next week is \emph{when episodes start and clear}, and that is driven by conditions
-  during the horizon itself (e.g.\ a change in the categorical regime G--J or a jump in D).
-  So the covariates belong in the \emph{decoder}, aligned with the forecast steps; putting them
-  only in the encoder wastes them.
-  \item \textbf{Without them the Autoformer cannot beat the training mean} (89.6 vs.\ 87.8). This
-  is an honest negative: at $H{=}168$ on a short-memory series, the target's own history alone
-  adds nothing over the mean.
-  \item \textbf{Metric disagreement.} With future covariates, sMAPE improves by 11\% but RMSE by
-  21\%. The gain is concentrated on large values (episode peaks and clearings), which dominate the
-  squared error. sMAPE is driven by low-level periods, where relative errors stay large.
-\end{itemize}
+
+The external file helps a lot, but only the part covering the forecast window. Adding the future
+covariates lowers RMSE by 18.5 (about 21\%), more than ten times the seed standard deviation. Past
+covariates alone change RMSE by only 0.7, which is within seed noise.
+
+I think the reason is the short memory of the series. The target forgets its past within 2--4
+days, and past covariates mostly repeat what the past target already shows. What decides the next
+week is when episodes start and end, and that depends on conditions during the week itself, such
+as a change in the G--J category or a jump in D. That is why these covariates need to go into the
+decoder, aligned with the forecast steps; putting them only in the encoder wastes them.
+
+Without the future covariates, the Autoformer does not even beat the training mean (89.6 vs.\ 87.8).
+For a 168-step horizon on a short-memory series, the target's own history adds nothing over its
+mean.
+
+The metrics also disagree: with future covariates, sMAPE improves by 11\% but RMSE by 21\%. The
+gain is concentrated on large values (episode peaks and drops), which dominate squared error, while
+sMAPE is driven by low-level stretches where relative errors stay large.
 
 %---------------------------------------------------------------------
 \subsection*{2.5 Tuning}
-Each variant changes \emph{one} setting of the past+future reference (the ablation's best row),
-3 seeds, same validation protocol. Logs are in \texttt{results/tune.log}.
+Each variant below changes one setting of the past+future model from the ablation, with 3 seeds
+and the same protocol (logs in \texttt{results/tune.log}).
 \begin{center}\small
 \begin{tabular}{lccccc}\toprule
 Variant & RMSE & MAE & sMAPE & Params & Epochs run\\\midrule
@@ -412,74 +410,67 @@ $L{=}96$                  & 76.25 $\pm$ 3.70 & 57.4 & 73.3 & 22{,}081 & 3.3\\\mi
 log + lr $3{\times}10^{-4}$ + $d{=}16$ & 68.54 $\pm$ 1.30 & 44.6 & 54.8 & 5{,}921 & 10 (cap)\\
 log + $d{=}16$            & 67.41 $\pm$ 2.96 & 43.7 & 54.1 & 5{,}921 & 8.0\\\bottomrule
 \end{tabular}\end{center}
-\begin{itemize}
-  \item \textbf{The $\log1p$ target is the largest and most reliable gain:} RMSE $-4.3$, MAE
-  $-21\%$, sMAPE $-23\%$, with the \emph{smallest} seed spread. The heavy right tail makes MSE on
-  the raw scale dominated by a few peaks. The log scale lets the model learn the bulk of the
-  distribution and the timing of episodes.
-  \item \textbf{Long context matters.} $L{=}96$ is clearly worse and $L{=}168$ is unstable. The
-  336-step window covers enough history for the decomposition and the delay scores to see several
-  daily cycles and the preceding episode.
-  \item \textbf{The gains did not stack.} Combining the log target with the lower learning rate
-  and the smaller width was \emph{worse} than the log target alone. The small models were still
-  improving at the 10-epoch cap or stalled early on some seeds ($\pm$2.96), so their parameter
-  saving would be paid back in epochs and in unpredictability.
-  \item \textbf{Metric disagreement.} The log target improves MAE and sMAPE far more than RMSE. It
-  optimises something close to a \emph{geometric} mean, which is good on typical levels and biased
-  low on spikes, and RMSE is the metric most sensitive to spikes.
-\end{itemize}
+
+Training on $\log(1+y)$ gave the biggest and most reliable gain: RMSE down 4.3, MAE down 21\%, sMAPE
+down 23\%, and the smallest spread across seeds. On the raw scale, a few large peaks dominate the
+squared error; on the log scale the model can learn the typical levels and the timing of episodes.
+The log target improves MAE and sMAPE much more than RMSE, though. It effectively predicts
+something close to a geometric mean, which is accurate on typical values but too low on spikes,
+and RMSE is the metric most sensitive to spikes.
+
+A long context matters: $L=96$ is clearly worse, and $L=168$ is unstable across seeds. With 336
+steps, the decomposition and the delay scores can see several daily cycles and the previous
+episode.
+
+The improvements did not add up. Combining the log target with the lower learning rate and the
+smaller model was worse than the log target alone. The small models were either still improving
+at the 10-epoch cap or stalled early on some seeds ($\pm$2.96), so the parameters they save would
+be paid back in extra epochs and less predictable results.
 
 %---------------------------------------------------------------------
 \subsection*{2.6 Final submission and what the leaderboard taught me}
-\textbf{Attempt \#1: a single refit model.}
-\begin{itemize}
-  \item \textbf{Model:} the $\log1p$-target configuration, seed 0. Early stopping on validation
-  ran 7 epochs (best epoch 5; val RMSE 67.46). It was then refit on the full history for 5 epochs.
-  $P=22{,}081$, $E=7+5=12$.
-  \item \textbf{Leaderboard:} RMSE \textbf{142.04}, MAE 96.4, sMAPE 99.3\%, score 142.04. This
-  is around the 97th percentile of the validation per-block RMSE (median 49), and the near-100\%
-  sMAPE shows the forecast was far too low. The model had predicted a ``clean'' week (median 23.6),
-  which the horizon covariates seemed to support.
-\end{itemize}
 
-\textbf{Diagnosis (training and validation data only; \texttt{diagnose*.py}).} A score in the tail
-can be bad luck, so before using another attempt I checked whether the \emph{method} was fragile:
+\textbf{Attempt \#1: a single refit model.} I submitted the $\log1p$ model with seed 0. Early
+stopping on validation ran 7 epochs (best epoch 5, validation RMSE 67.46), and I then refit it on
+the full history for 5 epochs ($P=22{,}081$, $E=7+5=12$). It scored RMSE 142.04 (MAE 96.4, sMAPE
+99.3\%, score 142.04). That is around the 97th percentile of my validation block RMSEs (median 49),
+and the sMAPE close to 100\% means the forecast was far too low. The model had predicted a ``clean''
+week (median 23.6), which the horizon covariates seemed to support.
+
+\textbf{Diagnosis.} One bad score can be bad luck, so before using another attempt I checked
+whether the method itself was fragile, using training and validation data only
+(\texttt{diagnose*.py}). I found three problems:
 \begin{itemize}
-  \item \textbf{The single-week forecast is unstable.} Across seeds 0--2, with and without refit,
-  the forecast for the hidden week had means from \textbf{26 to 71}. The average pairwise RMSE
-  between these six forecasts was 28.6. The submitted model was the lowest of the six.
-  \item \textbf{The refit step was never validated.} For seed 0 it moved the forecast mean from 71
-  (validated model) to 26. Pooled validation RMSE averages out such per-block variance; a single
+  \item The forecast for a single week is unstable. Across seeds 0--2, with and without refit, the
+  mean of the hidden-week forecast ranged from 26 to 71, and the six forecasts differed from each
+  other by an RMSE of 28.6 on average. The model I submitted gave the lowest of the six.
+  \item I never validated the refit step. For seed 0 it moved the forecast mean from 71 (the
+  validated model) to 26. Pooled validation RMSE averages this kind of variation away; a single
   168-step block does not.
-  \item \textbf{The log target is biased low in high weeks:} mean bias $-33.7$ on the top quartile
-  of validation blocks by level.
+  \item The log target is biased low in high-level weeks: the mean bias is $-33.7$ on the top
+  quarter of validation blocks.
 \end{itemize}
 
-\textbf{Attempt \#2: a 3-seed ensemble of validated models, no refit.} The decision rests on
-validation:
+\textbf{Attempt \#2: averaging three validated models, with no refit.} I chose this on validation:
 \begin{center}\small
 \begin{tabular}{lccccc}\toprule
  & Val RMSE & Val MAE & Block p90 & Block p97 & $P$ / $E$\\\midrule
 Single seeds 0/1/2 & 67.46 / 65.80 / 67.15 & 43.5--44.5 & 100--106 & 127--141 & 22{,}081 / 4--7\\
 \textbf{Mean of the 3 seeds} & \textbf{63.95} & \textbf{42.5} & \textbf{96} & \textbf{126} & 66{,}243 / 17\\\bottomrule
 \end{tabular}\end{center}
-\begin{itemize}
-  \item The ensemble beats every single seed on pooled RMSE and, above all, shortens the tail of
-  bad blocks, which is where attempt \#1 landed.
-  \item \textbf{Declared:} $\mathbf{P = 3\times22{,}081 = 66{,}243}$,
-  $\mathbf{E = 7+6+4 = 17}$ (each member's early-stopping epochs; no refit).
-  \item \textbf{Reproduce:} \texttt{python pipeline.py --final --exog full --target log --stride 4
-  --max\_epochs 10 --patience 2 --seeds 0 1 2 --tag final\_ensemble}.
-  \item \textbf{Leaderboard:} RMSE \textbf{112.15}, MAE 71.5, sMAPE 60.4\%, score \textbf{112.16}.
-  That is 30 RMSE better than attempt \#1.
-\end{itemize}
+The average beats every single seed on pooled RMSE and, more importantly, shortens the tail of bad
+blocks, which is where attempt \#1 landed. I declared $P = 3\times22{,}081 = 66{,}243$ and
+$E = 7+6+4 = 17$ (each member's early-stopping epochs). It is reproduced by
+\texttt{python pipeline.py --final --exog full --target log --stride 4 --max\_epochs 10
+--patience 2 --seeds 0 1 2 --tag final\_ensemble}. It scored RMSE 112.15 (MAE 71.5, sMAPE 60.4\%,
+score 112.16), 30 RMSE better than attempt \#1.
 
-\textbf{Attempt \#3: log + raw ensemble, chosen on validation.} Attempt \#2 showed that the size
-penalties are negligible, so larger ensembles cost almost nothing. I trained 5 log-target and 5
-raw-target members with the same validated early stopping and no refit
-(\texttt{ensemble\_members.py}). I then scored ensembles offline against attempt \#2 with a
-paired bootstrap over weeks of validation blocks (\texttt{ensemble\_eval.py}). Neighbouring blocks
-overlap, so the bootstrap resamples groups of 7 consecutive origins.
+\textbf{Attempt \#3: mixing log- and raw-target models.} Attempt \#2 showed that the size penalties
+are tiny, so larger ensembles cost almost nothing. I trained 5 log-target and 5 raw-target models
+with the same validated early stopping and no refit (\texttt{ensemble\_members.py}). I then compared
+ensembles of them with attempt \#2 using a paired bootstrap over weeks of validation blocks
+(\texttt{ensemble\_eval.py}). Because neighbouring blocks overlap, the bootstrap resamples groups
+of 7 consecutive forecast origins.
 \begin{center}\footnotesize\setlength{\tabcolsep}{4pt}
 \begin{tabular}{lcccccc}\toprule
 Ensemble & Val RMSE & $\Delta$ vs \#2 [90\% CI] & Block p97 & Bias (top quartile) & $P$ & $E$\\\midrule
@@ -490,235 +481,174 @@ raw $\times$5 & 67.66 & $+3.71$ [$-0.21$, $+7.97$] & 113 & $-13.5$ & 110{,}405 &
 log $\times$5 + raw $\times$5 (equal) & 62.44 & $-1.51$ [$-3.65$, $+0.64$] & 117 & $-26.2$ & 220{,}810 & 47\\
 \textbf{0.7 log $\times$5 + 0.3 raw $\times$5} & \textbf{62.05} & -- & -- & -- & 220{,}810 & 47\\\bottomrule
 \end{tabular}\end{center}
-\begin{itemize}
-  \item \textbf{More log seeds alone barely help} ($-0.55$). Raw-target models alone are worse on
-  RMSE and far worse on MAE and sMAPE, but they are much \emph{less biased on high-level weeks}
-  ($-14$ to $-18$ vs.\ $-37$). The two errors are complementary, so mixing helps.
-  \item \textbf{Mixing weight} (\texttt{ensemble\_weight.py}): for $\hat y=(1-w)\,\bar y_\text{log}
-  + w\,\bar y_\text{raw}$, validation RMSE is flat for $w\in[0.2,0.5]$ and lowest at $w=0.3$
-  (62.05). Re-choosing $w$ on 2000 bootstrap resamples picks 0.2--0.4 in 87\% of them and $w=0$
-  (log only) in 0.2\%. A single scalar fitted on 183 blocks carries little overfitting risk, and
-  $w=0.3$ beats the equal mix on RMSE, MAE and sMAPE.
-  \item \textbf{Declared:} $P = 10\times22{,}081 = 220{,}810$; $E = 30 + 17 = 47$ (sum of each
-  member's early-stopping epochs). Reproduce: \texttt{python ensemble\_members.py --targets log
-  raw --seeds 0 1 2 3 4} then \texttt{python make\_submission.py --raw\_weight 0.3 --tag mix\_w03}.
-  Rebuilding the log $\times$3 ensemble from the saved members reproduces attempt \#2 exactly.
-  \item \textbf{Leaderboard:} RMSE \textbf{102.21}, MAE 64.5, sMAPE 56.5\%, score
-  \textbf{102.23}. This is the submission the leaderboard uses.
-  \item \textbf{Caveat:} the gain on validation was about 1.9 RMSE, and the confidence interval of
-  the closely related equal mix included zero. The 10-point leaderboard gain is therefore partly
-  luck on one week. The raw members also forecast a higher week, which attempt \#1 had already
-  suggested was the truth. I chose the candidate and its weight on validation only, but attempt
-  \#1's result is what motivated spending another attempt.
-\end{itemize}
 
-\textbf{Lessons.}
-\begin{itemize}
-  \item \textbf{Size penalties are tiny here.} Score $-$ RMSE was 0.006, 0.009 and 0.024 for
-  attempts \#1--\#3 ($P$ from 22k to 221k). Differences between designs are tens of RMSE points,
-  so on this leaderboard variance reduction is worth far more than parameter economy.
-  \item \textbf{A good pooled validation score does not guarantee a good single-block score.}
-  I should have checked the stability of the forecast at the actual forecast origin before the
-  first submission, and not shipped an unvalidated refit.
-  \item \textbf{Transparency.} Leaderboard results \emph{prompted} the diagnosis and the decision to
-  use more attempts. Each submitted candidate and its settings were chosen on the validation
-  evidence above; no setting was tuned to the leaderboard score. Two of the five attempts were left
-  unused.
-\end{itemize}
+Adding more log seeds barely helps ($-0.55$). Raw-target models on their own are worse on RMSE and
+much worse on MAE and sMAPE, but they are far less biased in high weeks ($-14$ to $-18$ against
+$-37$). Their errors complement each other, so mixing helps. For a weighted mix
+$\hat y=(1-w)\,\bar y_\text{log} + w\,\bar y_\text{raw}$ (\texttt{ensemble\_weight.py}), validation
+RMSE is flat for $w$ between 0.2 and 0.5 and lowest at $w=0.3$ (62.05). Re-choosing $w$ on 2000
+bootstrap resamples picks 0.2--0.4 in 87\% of them and $w=0$ (log only) in just 0.2\%. A single
+weight fitted on 183 blocks has little room to overfit, and $w=0.3$ beats the equal mix on all
+three metrics.
+
+I declared $P = 10\times22{,}081 = 220{,}810$ and $E = 30 + 17 = 47$. The submission is reproduced
+by \texttt{python ensemble\_members.py --targets log raw --seeds 0 1 2 3 4} followed by
+\texttt{python make\_submission.py --raw\_weight 0.3 --tag mix\_w03}; rebuilding the 3-seed log
+ensemble from the saved models reproduces attempt \#2 exactly. It scored RMSE 102.21 (MAE 64.5,
+sMAPE 56.5\%, score 102.23), my best result and the one the leaderboard uses.
+
+I should be clear about how much of this is luck. On validation the gain was only about 1.9 RMSE,
+and the confidence interval for the very similar equal mix included zero, so part of the 10-point
+leaderboard gain is luck on one week. The raw models also forecast a higher week, which attempt
+\#1 had already hinted was the truth. I chose the candidate and its weight on validation only, but
+it was attempt \#1's result that made me spend another attempt.
+
+\textbf{What I learned.} The size penalties barely matter here: score minus RMSE was 0.006, 0.009
+and 0.024 for attempts 1--3, with $P$ ranging from 22k to 221k. Designs differ by tens of RMSE
+points, so reducing variance is worth far more than saving parameters. A good pooled validation
+score also does not guarantee a good score on one block. I should have checked how stable the
+forecast was at the real forecast origin before my first submission, and I should not have
+submitted a refit model I had never validated. Finally, the leaderboard results prompted my
+diagnosis and my decision to use more attempts, but every submitted model and setting was chosen
+on the validation evidence above. I left two of the five attempts unused.
 
 %---------------------------------------------------------------------
 \subsection*{2.7 Limitations}
-\begin{itemize}
-  \item The validation period (the last 6 months) is a single stretch of the series. If the
-  hidden block's behaviour differs from it, the validation ranking may not carry over.
-  \item The model treats the future covariates as given; their own measurement noise is not
-  modelled.
-  \item The daily phase assumes the period-24 cycle seen in the training spectrum continues into
-  the horizon.
-\end{itemize}
+My validation period (the last 6 months) is one stretch of the series; if the hidden week behaves
+differently, the validation ranking may not carry over. The model also takes the future
+covariates as exact, ignoring any measurement noise in them. Finally, the daily-phase features
+assume the 24-step cycle seen in training continues into the forecast window.
 
 %---------------------------------------------------------------------
 \subsection*{2.8 Reflection questions}
 
-\textbf{Q2.1 -- Auto-Correlation vs.\ self-attention.}
-\begin{itemize}
-  \item \emph{Where Auto-Correlation is strictly better:} stationary signals made of a few stable
-  periods, where every pair $(t,t-P)$ is related for the same reason. Tying all such pairs into
-  one score $R(P)$ pools evidence over the whole window, at $O(L\log L)$ cost. Attention must
-  rediscover the same relation pair by pair, at $O(L^2)$, with more variance. Task 1 is an
-  example: delay mixing alone cut MSE by 70\% vs.\ 47\% for decomposition.
-  \item \emph{What it throws away:} anything that is not a series-level shift. That includes
-  content-specific, non-stationary links between \emph{individual} positions, e.g.\ ``the value
-  right after the last regime change'' or a single precursor event. Its aggregation copies whole
-  shifted sequences, so position-specific relevance is lost. On our Task 2 series, whose spectrum
-  is red and episodic, there is little periodic structure for it to exploit. This is one reason the
-  model without covariates did not beat the mean.
-  \item \emph{When the period drifts over time:} within one window, no single lag aligns the
-  whole sequence. The peaks of $R(\tau)$ broaden and lower, and the aggregated copies go out of
-  phase (destructive averaging). Attention degrades more gracefully, because each query can pick
-  its own key, but it still has to learn the drift from data.
-\end{itemize}
+\textbf{Q2.1 -- Auto-Correlation vs.\ self-attention.} Auto-Correlation is the better bias for
+stationary signals built from a few stable periods. There every pair $(t, t-P)$ is related for the
+same reason, and a single score $R(P)$ pools that evidence over the whole window at $O(L\log L)$
+cost, whereas attention has to rediscover the relation pair by pair at $O(L^2)$. Task 1 is an
+example: delay mixing alone cut MSE by 70\%, against 47\% for decomposition. What it throws away is
+anything that is not a shift of the whole series, such as a link to one specific position (``the
+value right after the last regime change'') or a single precursor event, because it copies whole
+shifted sequences. My Task 2 series, with its red, episodic spectrum, has little periodic structure
+for it to use, which is one reason the model without covariates could not beat the mean. If the
+period drifts within a window, no single lag lines everything up: the peaks of $R(\tau)$ widen and
+shrink, and the shifted copies cancel each other out. Attention degrades more gracefully because
+each query picks its own keys, but it still has to learn the drift.
 
-\textbf{Q2.2 -- What the moving-average trend assumes.}
-\begin{itemize}
-  \item It assumes the trend is \emph{locally linear over the kernel} and much slower than the
-  seasonality. Only then does averaging remove the cycle and keep the trend.
-  \item \emph{Boundaries:} replicate padding biases the last $k/2$ trend values towards the end
-  value. The trend flattens exactly at the forecast origin, which is the most important point.
-  (Task 1, Output 2.1 shows this right-edge flattening.)
-  \item \emph{Curvature:} the filter is exact for linear trends only. At a peak of a curved
-  trend it under-shoots, and the curvature leaks into the seasonal part.
-  \item \emph{Abrupt level shift:} the shift is smeared into a ramp of width $k$, and an
-  S-shaped artefact appears in the seasonal component on both sides of it.
-  \item \emph{Alternative:} STL (LOESS-based) or a learnable/robust trend (e.g.\ median filter, or
-  a Hodrick--Prescott-style penalised fit). STL buys adaptivity to curvature and robustness to
-  outliers, under the assumption that the trend is \emph{smooth but not necessarily linear}. It
-  gives up a single fixed kernel, adds hyperparameters, costs more, and is not a simple
-  differentiable layer to apply in every block. A median filter preserves level shifts but is
-  non-smooth.
-\end{itemize}
+\textbf{Q2.2 -- What the moving-average trend assumes.} It assumes the trend is roughly linear over
+the kernel and much slower than the seasonal part. At the window edges, replicate padding pulls the
+last $k/2$ trend values towards the final value, so the trend flattens exactly at the forecast
+origin, where it matters most (Output 2.1 in Task 1 shows this). With curvature, the average
+undershoots at the peaks and the curvature leaks into the seasonal part. An abrupt level shift
+gets smeared into a ramp of width $k$, leaving an S-shaped artefact in the seasonal component. An
+alternative is STL (LOESS-based) decomposition, which assumes only that the trend is smooth, not
+linear, and is robust to outliers. In return it needs more hyperparameters, costs more, and is not
+a simple differentiable layer to put in every block. A median filter would keep level shifts sharp
+but is not smooth.
 
-\textbf{Q2.3 -- Progressive vs.\ one-shot decomposition.}
-\begin{itemize}
-  \item \emph{What it buys:} each block's mixing and feed-forward layers create new
-  low-frequency content in the \emph{learned} representation, e.g.\ residual connections
-  re-adding slow structure. Interleaved decomposition removes it again before the next mixer, so
-  every Auto-Correlation sees a near-zero-mean seasonal stream. A one-shot preprocessing step
-  works only on the raw input and cannot do this. The decoder can also refine the trend
-  progressively by accumulating each layer's extracted trend.
-  \item \emph{When it hurts:} when the useful ``seasonal'' signal is itself slower than the
-  kernel. Take a weekly cycle with $k=25$ on hourly data: every block pushes more of that cycle
-  into the trend path, which is only a linear projection and cannot model it. The mixer never sees
-  it. Repeatedly applying the same low-pass filter also compounds the boundary bias at every layer.
-\end{itemize}
+\textbf{Q2.3 -- Progressive vs.\ one-shot decomposition.} Inside the network, the mixing and
+feed-forward layers keep creating new slow components in the learned representation, for example
+through residual connections. Decomposing again in every block removes them before the next mixer,
+so each Auto-Correlation sees a roughly zero-mean seasonal stream. One-shot preprocessing only
+touches the raw input and cannot do this. Interleaving also lets the decoder build up the trend
+layer by layer. It can hurt when the useful seasonal signal is slower than the kernel: with a
+weekly cycle and $k=25$ on hourly data, every block pushes more of that cycle into the trend path,
+which is only a linear projection and cannot model it. Applying the same filter repeatedly also
+compounds the edge bias.
 
-\textbf{Q2.4 -- $k = c\log L$.}
-\begin{itemize}
-  \item \emph{Larger $k$:} more lags are blended. This hedges under uncertainty (the Task 1
-  argument about squared error), but it averages in weak or spurious lags, which blurs sharp
-  periodic structure. Compute also grows.
-  \item \emph{Smaller $k$:} the model commits to the strongest lag. That is sharp if the lag is
-  right and costly if it is wrong. It also cannot represent several co-existing periods.
-  \item \emph{Principled or convenient?} Mostly convenient. It keeps the total cost at
-  $O(L\log L)$, matching the FFT, and it grows slowly because longer windows contain more harmonics
-  of the same periods. No statistical argument fixes $\log L$ as the right count.
-  \item \emph{The better rule:} $k$ should be about the number of distinct periodicities times
-  the harmonics/multiples worth keeping, e.g.\ for Task 2 the lags 24 and 12 and their multiples.
-  Ideally it would be chosen from the significance of the peaks in $R(\tau)$, not from $L$.
-\end{itemize}
+\textbf{Q2.4 -- $k = c\log L$.} A larger $k$ blends more lags, which hedges when the right lag is
+uncertain but also mixes in weak or spurious lags and blurs sharp periodic structure. A smaller
+$k$ commits to the strongest lag: precise when it is right, costly when it is wrong, and unable to
+represent several periods at once. The $\log L$ form is mainly convenient, since it keeps the total
+cost at $O(L\log L)$ like the FFT and grows slowly as longer windows add harmonics of the same
+periods; I do not know of a statistical argument for it. Ideally $k$ would follow the number of
+distinct periods and the multiples worth keeping (for Task 2, 24, 12 and their multiples), chosen
+from how significant the peaks of $R(\tau)$ are rather than from $L$.
 
-\textbf{Q2.5 -- One-shot vs.\ autoregressive horizons.}
-\begin{itemize}
-  \item \emph{Error accumulation and exposure bias:} the autoregressive approach is trained on true
-  inputs but fed its own predictions at test time. Errors therefore compound, and the inputs come
-  from a distribution never seen in training. One-shot (direct) forecasting, as in Autoformer,
-  avoids both.
-  \item \emph{Error correlation:} autoregressive errors are strongly positively correlated along
-  the horizon, because one early miss shifts everything after it. Direct-forecast errors at
-  different steps are less coupled, but the forecast can be less self-consistent, e.g.\ jagged or
-  smoothed towards the mean, as our model does beyond the ACF memory.
-  \item \emph{When each is preferable:} autoregressive suits low-noise, near-deterministic
-  dynamics with short horizons (e.g.\ a well-identified AR process), where re-using the transition
-  model is efficient. Direct suits noisy, heavy-tailed series and long horizons. The longer the
-  horizon, the more the comparison favours direct (or hybrid, e.g.\ multi-step blocks) methods.
-\end{itemize}
+\textbf{Q2.5 -- One-shot vs.\ autoregressive horizons.} An autoregressive model is trained on true
+inputs but fed its own predictions at test time, so errors compound and the inputs drift away from
+anything seen in training (exposure bias). A one-shot model, like Autoformer, avoids both. The
+error structure also differs: autoregressive errors are strongly correlated along the horizon,
+because one early miss shifts everything after it, while direct-forecast errors are less coupled
+but the forecast can be less consistent, for example smoothed towards the mean, as my model does
+beyond the ACF memory. Autoregressive forecasting suits low-noise, nearly deterministic dynamics and
+short horizons; direct forecasting suits noisy, heavy-tailed series and long horizons, and its
+advantage grows as the horizon gets longer.
 
-\textbf{Q2.6 -- Window-relative normalisation (RevIN-style).}
-\begin{itemize}
-  \item \emph{What is destroyed:} the absolute level and scale of the window, i.e.\ where the
-  series sits relative to its long-run distribution.
-  \item \emph{When that matters:} when the future depends on the absolute level, e.g.\
-  mean-reversion towards a global mean, physical bounds (non-negativity, saturation), or regimes
-  defined by level (a pollution episode at 400 behaves differently from a calm period at 20).
-  \item \emph{Helps a lot:} a series with drifting level/scale but stable shape, e.g.\ sales
-  growing over years with the same weekly pattern. Without it, the model would extrapolate outside
-  the training range.
-  \item \emph{Provably loses something:} a mean-reverting series such as an OU process. Two
-  windows with identical shape at levels $+3\sigma$ and $-3\sigma$ need opposite forecasts (one
-  falls, one rises). After normalisation they are identical inputs, so no model can separate them,
-  unless the statistics are fed back in as features. Our Task 2 series is of this kind: at
-  $H{=}168$ the best naive forecast is the \emph{global} mean (87.8), not the window mean (94.8).
-  That is why I used global, training-fitted scaling.
-\end{itemize}
+\textbf{Q2.6 -- Window-relative normalisation.} It throws away the absolute level and scale of the
+window, i.e.\ where the series sits within its long-run range. That matters when the future depends
+on the level: mean reversion, physical limits, or regimes defined by level (an episode at 400
+behaves differently from a calm spell at 20). It helps a lot for a series whose level drifts but
+whose shape is stable, such as sales growing over years with the same weekly pattern. It provably
+loses something for a mean-reverting series: two windows with the same shape at $+3\sigma$ and
+$-3\sigma$ need opposite forecasts, but they look identical after normalisation, unless the
+removed statistics are fed back in. My Task 2 series behaves like this, since at $H=168$ the
+global mean (87.8) beats the window mean (94.8), which is why I used global scaling fitted on the
+training data.
 
-\textbf{Q2.7 -- Past-known vs.\ future-known covariates.}
-\begin{itemize}
-  \item The distinction changes \emph{where} they enter, not just how much they help.
-  Past-only covariates belong in the encoder, alongside the target history. Future-known
-  covariates must also reach the \emph{decoder}, aligned with the forecast steps, so that step
-  $t{+}h$ can condition on $x_{t+h}$. Putting a future-known variable only in the encoder throws
-  away exactly its useful part.
-  \item \emph{Informative only when future-known:} a fast-acting exogenous driver with little
-  persistence, e.g.\ wind or rain in the hour being forecast (for pollution), or a scheduled
-  promotion (for sales). Its past values say little about $y_{t+h}$. Our ablation shows exactly
-  this: past only gives 88.9 ($\approx$ none, 89.6); past+future gives 71.1.
-  \item \emph{Equally useful in both:} a slowly varying or deterministic covariate whose past
-  determines its future, e.g.\ a daily-phase indicator, a holiday calendar, or a slowly drifting
-  temperature trend. Knowing its future adds nothing to knowing its past.
-\end{itemize}
+\textbf{Q2.7 -- Past-known vs.\ future-known covariates.} The distinction changes where they should
+enter, not just how much they help. Covariates known only up to the origin belong in the encoder
+with the target history. Covariates known over the horizon must also reach the decoder, aligned
+with the forecast steps, so that step $t+h$ can use $x_{t+h}$; putting them only in the encoder
+wastes exactly the useful part. A fast-acting driver with little persistence, such as wind or rain
+during the hour being forecast, is informative only when its future is known, and my ablation
+shows this (past only 88.9, close to none at 89.6; past and future 71.1). A slow or deterministic
+covariate, such as the daily phase or a holiday calendar, is equally useful in both cases, because
+its past already determines its future.
 
-\textbf{Q2.8 -- No calendar features.}
-\begin{itemize}
-  \item \emph{What is lost:} hour-of-day, day-of-week and month/season effects, as well as holidays
-  and irregular calendar events (moving holidays, DST shifts). The model also cannot align
-  multi-scale cycles without being told the base unit.
-  \item \emph{How to recover it:} periodogram/ACF peaks (here 24 and 12, so a daily cycle in
-  hourly data), then phase features $\sin/\cos(2\pi\,\texttt{idx}/P)$. Auto-Correlation also
-  discovers dominant lags implicitly.
-  \item \emph{What must hold for this to be trustworthy:} the sampling is truly uniform with no
-  gaps (guaranteed here), the period is stationary over the training span and the horizon, and
-  the peak is genuinely significant, not a leakage artefact of a red spectrum. It should be
-  checked on separate sub-periods. Holidays and other irregular events cannot be recovered this way.
-\end{itemize}
+\textbf{Q2.8 -- No calendar features.} Without timestamps the model loses hour-of-day, day-of-week
+and seasonal effects, holidays and other irregular calendar events, and it cannot align cycles at
+different scales without knowing the base unit. Periodic structure can still be recovered from
+peaks in the periodogram and ACF (here 24 and 12, i.e.\ a daily cycle in hourly data) and then
+encoded as $\sin/\cos(2\pi\,\texttt{idx}/P)$ features; Auto-Correlation also finds dominant lags on
+its own. For this to be trustworthy, sampling must be uniform with no gaps (guaranteed here), the
+period must stay stable over training and the horizon, and the peak must be genuinely significant
+rather than an artefact of a red spectrum, which can be checked on separate sub-periods. Holidays
+and other irregular events cannot be recovered this way.
 
-\textbf{Q2.9 -- Structural models vs.\ decomposition Transformers.}
-\begin{itemize}
-  \item \emph{Structural models (ETS/SARIMA/state-space) win} with short series (hundreds to a few
-  thousand points), low signal-to-noise, and a regular, stable seasonal structure. Their strong
-  priors are roughly correct and their few parameters keep variance low.
-  \item \emph{Transformers win} with long series (tens of thousands of points or many related
-  series), rich covariates, non-linear interactions, and several or varying seasonalities that
-  linear structural forms cannot express. Here the extra parameters are paid for by data.
-  \item \emph{Deciding beforehand:} compare the length to the parameter count (here 43k points vs.\
-  about 22k parameters, which is borderline). Check the spectrum's regularity: a few sharp peaks
-  favour structural models; a red, episodic spectrum favours flexible ones. Fit a cheap structural
-  baseline and a linear model with covariates first, and accept the Transformer only if it beats
-  them on rolling-origin validation by more than the seed spread. In our case the
-  Transformer without covariates did not beat the training mean, while with future covariates it
-  did by a wide margin. So any advantage comes from \emph{using covariates}, not from the target's
-  own dynamics. A linear model with covariates would be the right next baseline to test whether
-  that advantage needs the Transformer at all.
-\end{itemize}
+\textbf{Q2.9 -- Structural models vs.\ decomposition Transformers.} Structural models (ETS, SARIMA,
+state-space) win on short series (hundreds to a few thousand points), at low signal-to-noise and
+with regular, stable seasonality, where their strong assumptions are roughly right and their few
+parameters keep variance low. Transformers win on long series or many related series, with rich
+covariates, non-linear interactions and several or changing seasonalities, where the data can pay
+for the extra parameters. Before training I would compare the series length with the parameter
+count (here 43k points against about 22k parameters, which is borderline), look at how regular the
+spectrum is (a few sharp peaks favour structural models, a red, episodic spectrum favours flexible
+ones), and fit a cheap structural baseline and a linear model with covariates first, accepting the
+Transformer only if it beats them by more than the seed spread. In my case the Transformer did not
+beat the training mean without covariates but did by a wide margin with future covariates, so its
+advantage comes from using the covariates; a linear model with covariates would be the right next
+baseline to test whether that needs a Transformer at all.
 
 %=====================================================================
 \section*{Use of generative AI}
-I used Claude Code (Anthropic; model Claude Opus 5.5) as an assistant throughout, in one working
-session. The prompts below are paraphrased in order, with what the tool produced and what I
-changed or decided.
+I used Claude Code (Anthropic; model Claude Opus 5.5) as an assistant throughout. The prompts are
+paraphrased below in order, with what the tool produced.
 \begin{enumerate}
-  \item \emph{``Review the assignment content and tell me the summary and what to do.''} Output: a
-  summary of both tasks, the deliverables and a suggested order of work.
-  \item \emph{``Use the ml310 conda env; start with Task 1.''} Output: implementations of
+  \item \emph{``Review the assignment content and tell me the summary and what to do.''} A summary
+  of both tasks, the deliverables and a suggested order of work.
+  \item \emph{``Use the ml310 conda env; start with Task 1.''} Implementations of
   \texttt{RawAttentionForecaster.forward}, \texttt{SeriesDecomposition.forward} and
-  \texttt{aggregate\_delays}, checked against the notebook's worked examples and assertions, then
+  \texttt{aggregate\_delays}, checked against the notebook's worked examples and assertions, and
   the smoke and full-preset notebook runs.
   \item \emph{``Start the Task 2 Autoformer pipeline''; ``run the combined config and build the
-  final submission''.} Output: \texttt{autoformer.py} (written following Wu et al.\ 2021 and the
-  thuml reference code), \texttt{pipeline.py}, the external-data ablation, the tuning sweep and the
-  first submission.
+  final submission''.} \texttt{autoformer.py} (following Wu et al.\ 2021 and the thuml reference
+  code), \texttt{pipeline.py}, the external-data ablation, the tuning sweep and the first
+  submission.
   \item \emph{``Draft the Task 1 report responses''; ``draft the Task 2 report section''; ``answer
-  the Q2.1--Q2.9 reflection questions''.} Output: the draft text of this report, including tables
-  built from the saved outputs.
-  \item After leaderboard attempt \#1, I shared the score. Output: the stability diagnosis and the
+  the Q2.1--Q2.9 reflection questions''.} The first draft of this report, with tables built from
+  the saved outputs.
+  \item After leaderboard attempt \#1, I shared the score. The stability diagnosis and the
   validation of a 3-seed ensemble (attempt \#2). Then \emph{``Let's try to improve the leaderboard
-  score''}. Output: the log/raw ensemble study and attempt \#3.
+  score''}: the log/raw ensemble study and attempt \#3.
   \item \emph{``Set up the GitHub repo structure''; ``include the data CSVs and commit everything''.}
-  Output: \texttt{README.md}, \texttt{.gitignore}, the commits and the push.
+  \texttt{README.md}, \texttt{.gitignore}, the commits and the push.
+  \item \emph{``Make changes for me and I will review and make edits.''} An editing pass that
+  rewrote the report's prose in plainer language, keeping all numbers, tables and figures.
 \end{enumerate}
 \textbf{My decisions and edits.} I chose the deployment models (period-routed ridge for both
-populations), supplied my own Response 1A and 4(a) predictions, decided which leaderboard attempts
-to make and when to stop, and chose which data and files to publish. I reviewed every number in this
-report against the files in \texttt{results/}. \textbf{[Before submitting: add the edits you make
-when rewriting the draft in your own words.]}
+populations), gave my own Response 1A and 4(a) predictions, decided which leaderboard attempts to
+make and when to stop, and chose which data and files to publish. \todo{Describe the edits you
+made to the text yourself, then delete this marker.}
 
 \end{document}

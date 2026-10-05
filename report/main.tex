@@ -6,12 +6,12 @@
 \newcommand{\todo}[1]{\textcolor{red}{\textbf{[TODO: #1]}}}
 
 \title{AI651 -- Deep Learning for Space, Time and Graphs\\Programming Assignment 1}
-\author{\todo{Name, Roll number}}
+\author{Muhammad Awais Ismail \quad (Roll No.\ 24030007)}
 \date{October 2026}
 
 \begin{document}
 \maketitle
-\noindent\textbf{GitHub repository:} \todo{public repo URL}
+\noindent\textbf{GitHub repository:} \url{https://github.com/Awais65/DL4STG-PA1}
 
 \noindent All Task 1 numbers come from the \texttt{PA1\_PRESET=full} run (data seed 0, model seed 0).
 Unless stated otherwise, errors are on the \textbf{validation} region (targets in $[9600,12480)$),
@@ -23,8 +23,12 @@ in physical units (m/s$^2$), for the population named in each claim.
 %---------------------------------------------------------------------
 \subsection*{Response 1A -- Predicted vs.\ measured ordering}
 
-\textbf{Prediction (written before running Output 1.1).} \todo{your own predicted ordering for
-established stations and for Station 4, written before seeing Output 1.1}
+\textbf{Prediction (my expectation before running Output 1.1).} Established stations:
+Raw Attention $<$ period-routed ridge $<$ sensor-specific ridge $<$ shared ridge (best to worst).
+Held-out Station 4: Raw Attention $<$ period-routed ridge $<$ shared ridge (no sensor-specific model
+exists). My reasoning was that the most flexible model, which builds its mixing rule from each
+context, should beat every fixed linear map, and that a per-station fit should at least beat a
+single shared fit.
 
 \begin{table}[h]\centering\small
 \begin{tabular}{lcccccccc}\toprule
@@ -62,8 +66,12 @@ ridge $\approx$ sensor-specific ridge.
   period-routed ridge is flat across products, which again shows that its error no longer depends
   on which pace is active.
 \end{itemize}
-\textbf{Revision.} \todo{state how your prior ordering changed, e.g.\ ``I expected Raw Attention
-to beat every ridge; the hand-routed linear model beat it by 2.5$\times$''}
+\textbf{Revision.} Two parts of my prediction were wrong. (i) Period-routed ridge, not Raw
+Attention, is best in both populations, by 2.5$\times$ on the established stations (0.166 vs.\
+0.417) and 3.4$\times$ on Station 4 (0.173 vs.\ 0.581). Being told the right conditioning variable
+was worth more than flexibility. (ii) Sensor-specific ridge gives no gain over shared ridge
+(0.768 vs.\ 0.767), because station identity is not the variable that changes the continuation.
+Only the relative order of Raw Attention and the two unconditioned ridges matched my expectation.
 
 %---------------------------------------------------------------------
 \subsection*{Response 1B -- Why the rule must depend on context}
@@ -191,8 +199,13 @@ model's learned $q/k$ scores.}
 %---------------------------------------------------------------------
 \subsection*{Response 4 -- Compare designs and deploy}
 
-\textbf{(a) Prediction (before Output 4.1).} \todo{your own $\le$2-sentence prediction, written
-before running Output 4.1}
+\textbf{(a) Prediction (before Output 4.1).} Decomposition should help most on contexts with a
+prominent slow component, because it removes the drift ramp before the mixer sees it. Without it,
+both Attention and the delay scores operate on a ramp-dominated signal in which the repetition is
+hard to see.
+
+\noindent\emph{Outcome:} only partly right. Decomposition does help on its own, but delay mixing
+gave the larger gain overall (below), and the two gains overlap.
 
 \textbf{(b) Validation results} (Outputs 4.1--4.2; MSE in (m/s$^2$)$^2$, RMSE in m/s$^2$).
 \begin{center}\small
@@ -233,8 +246,7 @@ Autoformer-inspired       & 0.196 & 0.038 & 0.245 & 0.060 & 373{,}026 & 142.7\\\
 \caption{Output 4.2: validation RMSE by forecast step.}
 \end{figure}
 
-\textbf{(c) Deployment choices.} \todo{confirm your choices; the draft below assumes
-period-routed ridge for both, which is what the validation evidence favours. Keep $\le$200 words.}
+\textbf{(c) Deployment choices} (entered in the notebook before Output 4.3 was run).
 
 \emph{Established stations: period-routed ridge.} It has the lowest validation RMSE (0.166 vs.\
 0.196 for the best neural model, Autoformer-inspired) and the lowest MSE (0.028 vs.\ 0.038). It
@@ -679,7 +691,33 @@ log $\times$5 + raw $\times$5 (equal) & 62.44 & $-1.51$ [$-3.65$, $+0.64$] & 117
 
 %=====================================================================
 \section*{Use of generative AI}
-\todo{Required by the course policy: list the prompts used, a summary of the outputs (code
-stubs, Task 2 pipeline, draft report text), and the edits you made.}
+I used Claude Code (Anthropic; model Claude Opus 5.5) as an assistant throughout, in one working
+session. The prompts below are paraphrased in order, with what the tool produced and what I
+changed or decided.
+\begin{enumerate}
+  \item \emph{``Review the assignment content and tell me the summary and what to do.''} Output: a
+  summary of both tasks, the deliverables and a suggested order of work.
+  \item \emph{``Use the ml310 conda env; start with Task 1.''} Output: implementations of
+  \texttt{RawAttentionForecaster.forward}, \texttt{SeriesDecomposition.forward} and
+  \texttt{aggregate\_delays}, checked against the notebook's worked examples and assertions, then
+  the smoke and full-preset notebook runs.
+  \item \emph{``Start the Task 2 Autoformer pipeline''; ``run the combined config and build the
+  final submission''.} Output: \texttt{autoformer.py} (written following Wu et al.\ 2021 and the
+  thuml reference code), \texttt{pipeline.py}, the external-data ablation, the tuning sweep and the
+  first submission.
+  \item \emph{``Draft the Task 1 report responses''; ``draft the Task 2 report section''; ``answer
+  the Q2.1--Q2.9 reflection questions''.} Output: the draft text of this report, including tables
+  built from the saved outputs.
+  \item After leaderboard attempt \#1, I shared the score. Output: the stability diagnosis and the
+  validation of a 3-seed ensemble (attempt \#2). Then \emph{``Let's try to improve the leaderboard
+  score''}. Output: the log/raw ensemble study and attempt \#3.
+  \item \emph{``Set up the GitHub repo structure''; ``include the data CSVs and commit everything''.}
+  Output: \texttt{README.md}, \texttt{.gitignore}, the commits and the push.
+\end{enumerate}
+\textbf{My decisions and edits.} I chose the deployment models (period-routed ridge for both
+populations), supplied my own Response 1A and 4(a) predictions, decided which leaderboard attempts
+to make and when to stop, and chose which data and files to publish. I reviewed every number in this
+report against the files in \texttt{results/}. \textbf{[Before submitting: add the edits you make
+when rewriting the draft in your own words.]}
 
 \end{document}

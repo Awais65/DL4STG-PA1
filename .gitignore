@@ -21,3 +21,8 @@ report/*.out
 report/*.synctex.gz
 report/*.fdb_latexmk
 report/*.fls
+
+# Local editor settings
+.vscode/
+report/build.txt
+report/main.pdf

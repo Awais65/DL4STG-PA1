@@ -4,6 +4,7 @@
 \graphicspath{{figures/}}
 \setlist{itemsep=2pt,topsep=3pt}
 \newcommand{\todo}[1]{\textcolor{red}{\textbf{[TODO: #1]}}}
+\sloppy  % allow looser spacing so long \texttt commands wrap instead of running into the margin
 
 \title{AI651 -- Deep Learning for Space, Time and Graphs\\Programming Assignment 1}
 \author{Muhammad Awais Ismail \quad (Roll No.\ 24030007)}
@@ -458,9 +459,9 @@ can be bad luck, so before using another attempt I checked whether the \emph{met
 validation:
 \begin{center}\small
 \begin{tabular}{lccccc}\toprule
- & Val RMSE & Val MAE & Block RMSE p90 & Block RMSE p97 & $P$ / $E$\\midrule
-Single seeds 0/1/2 & 67.46 / 65.80 / 67.15 & 43.5--44.5 & 100--106 & 127--141 & 22{,}081 / 4--7\
-\textbf{Mean of the 3 seeds} & \textbf{63.95} & \textbf{42.5} & \textbf{96} & \textbf{126} & 66{,}243 / 17\\bottomrule
+ & Val RMSE & Val MAE & Block p90 & Block p97 & $P$ / $E$\\\midrule
+Single seeds 0/1/2 & 67.46 / 65.80 / 67.15 & 43.5--44.5 & 100--106 & 127--141 & 22{,}081 / 4--7\\
+\textbf{Mean of the 3 seeds} & \textbf{63.95} & \textbf{42.5} & \textbf{96} & \textbf{126} & 66{,}243 / 17\\\bottomrule
 \end{tabular}\end{center}
 \begin{itemize}
   \item The ensemble beats every single seed on pooled RMSE and, above all, shortens the tail of
@@ -479,7 +480,7 @@ raw-target members with the same validated early stopping and no refit
 (\texttt{ensemble\_members.py}). I then scored ensembles offline against attempt \#2 with a
 paired bootstrap over weeks of validation blocks (\texttt{ensemble\_eval.py}). Neighbouring blocks
 overlap, so the bootstrap resamples groups of 7 consecutive origins.
-\begin{center}\small
+\begin{center}\footnotesize\setlength{\tabcolsep}{4pt}
 \begin{tabular}{lcccccc}\toprule
 Ensemble & Val RMSE & $\Delta$ vs \#2 [90\% CI] & Block p97 & Bias (top quartile) & $P$ & $E$\\\midrule
 log $\times$3 (attempt \#2) & 63.95 & -- & 126 & $-36.8$ & 66{,}243 & 17\\

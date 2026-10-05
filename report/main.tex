@@ -213,9 +213,9 @@ gave the larger gain overall (below), and the two gains overlap.
  & \multicolumn{2}{c}{Established} & \multicolumn{2}{c}{Held-out St.\,4} & & \\
  \cmidrule(lr){2-3}\cmidrule(lr){4-5}
 Model & RMSE & MSE & RMSE & MSE & Params & Fit (s)\\\midrule
-Shared ridge              & 0.767 & 0.588 & 0.876 & 0.767 & 4{,}608   & 0.002\\
-Sensor-specific ridge     & 0.768 & 0.590 & --    & --    & 13{,}824  & 0.031\\
-Period-routed ridge       & \textbf{0.166} & \textbf{0.028} & \textbf{0.173} & \textbf{0.030} & 59{,}904 & 0.004\\
+Shared ridge              & 0.767 & 0.588 & 0.876 & 0.767 & 4{,}608   & 0.003\\
+Sensor-specific ridge     & 0.768 & 0.590 & --    & --    & 13{,}824  & 0.029\\
+Period-routed ridge       & \textbf{0.166} & \textbf{0.028} & \textbf{0.173} & \textbf{0.030} & 59{,}904 & 0.005\\
 Raw Attention             & 0.417 & 0.174 & 0.581 & 0.338 & 368{,}368 & 101.7\\
 Attention + decomposition & 0.302 & 0.091 & 0.450 & 0.202 & 373{,}024 & 188.3\\
 Raw delay mixer           & 0.230 & 0.053 & 0.346 & 0.119 & 368{,}370 & 305.5\\
@@ -223,7 +223,7 @@ Autoformer-inspired       & 0.196 & 0.038 & 0.245 & 0.060 & 373{,}026 & 142.7\\\
 \end{tabular}\end{center}
 
 Both switches help on their own, and delay mixing helps more. Starting from Raw Attention
-(established MSE 0.174), decomposition lowers MSE by 0.082 (47\%), delay mixing by 0.121 (70\%), and
+(established MSE 0.174), decomposition lowers MSE by 0.082 (47\%), delay mixing by 0.120 (69\%), and
 the two together by 0.135 (78\%). Station 4 shows the same pattern (0.338 to 0.202, 0.119 and
 0.060).
 
@@ -324,7 +324,7 @@ applied first to the skewed cumulative features D, E and F). Every configuration
 larger than the spread across seeds.
 
 On the same 183 blocks, the simple baselines score (RMSE): training mean 87.8, mean of the last 7
-days 94.8, seasonal naive (lag 24) 117.9 and persistence 122.2. The training mean beats persistence
+days 94.7, seasonal naive (lag 24) 117.9 and persistence 122.2. The training mean beats persistence
 because 168 steps is far beyond the ACF memory, which shows how hard this horizon is.
 
 %---------------------------------------------------------------------
@@ -366,7 +366,7 @@ I trained the same model three ways, 3 seeds each, under the protocol above
 \begin{center}\small
 \begin{tabular}{lcccc}\toprule
 External data used & RMSE & MAE & sMAPE & Block RMSE\\\midrule
-None (target + daily phase only)               & 89.64 $\pm$ 0.74 & 69.1 $\pm$ 1.2 & 79.5 $\pm$ 0.3 & 81.8\\
+None (target + daily phase only)               & 89.64 $\pm$ 0.74 & 69.1 $\pm$ 1.1 & 79.5 $\pm$ 0.3 & 81.8\\
 Past only (up to the forecast origin)          & 88.91 $\pm$ 0.44 & 69.3 $\pm$ 1.3 & 79.5 $\pm$ 0.5 & 81.7\\
 \textbf{Past + future (across the horizon)}    & \textbf{71.13 $\pm$ 1.46} & \textbf{55.9 $\pm$ 2.9} & \textbf{70.9 $\pm$ 1.6} & \textbf{67.3}\\
 \midrule
@@ -403,10 +403,10 @@ Reference ($L{=}336$, $d{=}32$, lr $10^{-3}$, raw target) & 71.13 $\pm$ 1.46 & 5
 lr $3{\times}10^{-4}$     & 67.60 $\pm$ 1.85 & 51.5 & 67.5 & 22{,}081 & 6.0\\
 $d{=}16$, $d_\text{ff}{=}32$ & 67.89 $\pm$ 2.36 & 51.6 & 68.4 & $\approx$5.9k & 4.3\\
 Huber loss                & 69.92 $\pm$ 2.07 & 53.1 & 68.5 & 22{,}081 & 3.0\\
-drop feature C            & 70.17 $\pm$ 0.66 & 55.5 & 70.5 & 22{,}049 & 3.7\\
+drop feature C            & 70.17 $\pm$ 0.66 & 55.5 & 70.5 & 22{,}017 & 3.7\\
 $L{=}168$                 & 70.20 $\pm$ 6.44 & 53.7 & 69.9 & 22{,}081 & 3.3\\
 dropout 0.3, lr $3{\times}10^{-4}$ & 71.01 $\pm$ 0.89 & 55.6 & 70.1 & 22{,}081 & 4.7\\
-$L{=}96$                  & 76.25 $\pm$ 3.70 & 57.4 & 73.3 & 22{,}081 & 3.3\\\midrule
+$L{=}96$                  & 76.25 $\pm$ 3.70 & 57.4 & 73.2 & 22{,}081 & 3.3\\\midrule
 log + lr $3{\times}10^{-4}$ + $d{=}16$ & 68.54 $\pm$ 1.30 & 44.6 & 54.8 & 5{,}921 & 10 (cap)\\
 log + $d{=}16$            & 67.41 $\pm$ 2.96 & 43.7 & 54.1 & 5{,}921 & 8.0\\\bottomrule
 \end{tabular}\end{center}
@@ -455,7 +455,7 @@ whether the method itself was fragile, using training and validation data only
 \begin{center}\small
 \begin{tabular}{lccccc}\toprule
  & Val RMSE & Val MAE & Block p90 & Block p97 & $P$ / $E$\\\midrule
-Single seeds 0/1/2 & 67.46 / 65.80 / 67.15 & 43.5--44.5 & 100--106 & 127--141 & 22{,}081 / 4--7\\
+Single seeds 0/1/2 & 67.46 / 65.80 / 67.15 & 43.5--44.4 & 100--106 & 127--141 & 22{,}081 / 4--7\\
 \textbf{Mean of the 3 seeds} & \textbf{63.95} & \textbf{42.5} & \textbf{96} & \textbf{126} & 66{,}243 / 17\\\bottomrule
 \end{tabular}\end{center}
 The average beats every single seed on pooled RMSE and, more importantly, shortens the tail of bad
@@ -526,7 +526,7 @@ assume the 24-step cycle seen in training continues into the forecast window.
 stationary signals built from a few stable periods. There every pair $(t, t-P)$ is related for the
 same reason, and a single score $R(P)$ pools that evidence over the whole window at $O(L\log L)$
 cost, whereas attention has to rediscover the relation pair by pair at $O(L^2)$. Task 1 is an
-example: delay mixing alone cut MSE by 70\%, against 47\% for decomposition. What it throws away is
+example: delay mixing alone cut MSE by 69\%, against 47\% for decomposition. What it throws away is
 anything that is not a shift of the whole series, such as a link to one specific position (``the
 value right after the last regime change'') or a single precursor event, because it copies whole
 shifted sequences. My Task 2 series, with its red, episodic spectrum, has little periodic structure
@@ -583,7 +583,7 @@ whose shape is stable, such as sales growing over years with the same weekly pat
 loses something for a mean-reverting series: two windows with the same shape at $+3\sigma$ and
 $-3\sigma$ need opposite forecasts, but they look identical after normalisation, unless the
 removed statistics are fed back in. My Task 2 series behaves like this, since at $H=168$ the
-global mean (87.8) beats the window mean (94.8), which is why I used global scaling fitted on the
+global mean (87.8) beats the window mean (94.7), which is why I used global scaling fitted on the
 training data.
 
 \textbf{Q2.7 -- Past-known vs.\ future-known covariates.} The distinction changes where they should
